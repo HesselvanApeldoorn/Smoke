@@ -1,5 +1,8 @@
-#include "Simulation.hpp"
 #include <GL/glut.h>
+
+#include "Simulation.hpp"
+#include "Util.hpp"
+
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
 
 Simulation::Simulation()
@@ -41,9 +44,6 @@ void Simulation::FFT(int direction,void* vx)
 	if(direction==1) rfftwnd_one_real_to_complex(plan_rc,(fftw_real*)vx,(fftw_complex*)vx);
 	else             rfftwnd_one_complex_to_real(plan_cr,(fftw_complex*)vx,(fftw_real*)vx);
 }
-
-int Simulation::clamp(float x)
-{ return ((x)>=0.0?((int)(x)):(-((int)(1-(x))))); }
 
 float Simulation::max(float x, float y)
 { return x < y ? x : y; }
@@ -147,6 +147,13 @@ void Simulation::set_forces(void)
 	}
 }
 
+void Simulation::insert_forces(int X, int Y, double dx, double dy)
+{
+	fx[Y * DIM + X] += dx;
+	fy[Y * DIM + X] += dy;
+	rho[Y * DIM + X] = 10.0f;
+}
+
 
 //do_one_simulation_step: Do one complete cycle of the simulation:
 //      - set_forces:
@@ -164,3 +171,17 @@ void Simulation::do_one_simulation_step(void)
 	}
 }
 
+void Simulation::change_timestep(double step)
+{
+	dt += step;
+}
+
+void Simulation::change_viscosity(double viscosity)
+{
+	visc *= viscosity;
+}
+
+void Simulation::toggle_frozen()
+{
+	frozen = 1-frozen;
+}

@@ -1,0 +1,1 @@
+int clamp(float x);

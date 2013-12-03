@@ -17,6 +17,7 @@ Visualization::Visualization()
 	draw_smoke = 0;           //draw the smoke or not
 	draw_vecs = 1;            //draw the vector field or not
 }
+
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
 {
@@ -90,7 +91,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 		px = wn + (fftw_real)i * wn;
 		py = hn + (fftw_real)j * hn;
 		idx = (j * DIM) + i;
-		glColor3f(Simulation.rho[idx],Simulation.rho[idx],Simulation.rho[idx]);
+		glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
 		glVertex2f(px,py);
 
 		for (i = 0; i < DIM - 1; i++)
@@ -98,19 +99,19 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 			px = wn + (fftw_real)i * wn;
 			py = hn + (fftw_real)(j + 1) * hn;
 			idx = ((j + 1) * DIM) + i;
-			set_colormap(rho[idx]);
+			set_colormap(simulation.rho[idx]);
 			glVertex2f(px, py);
 			px = wn + (fftw_real)(i + 1) * wn;
 			py = hn + (fftw_real)j * hn;
 			idx = (j * DIM) + (i + 1);
-			set_colormap(rho[idx]);
+			set_colormap(simulation.rho[idx]);
 			glVertex2f(px, py);
 		}
 
 		px = wn + (fftw_real)(DIM - 1) * wn;
 		py = hn + (fftw_real)(j + 1) * hn;
 		idx = ((j + 1) * DIM) + (DIM - 1);
-		set_colormap(rho[idx]);
+		set_colormap(simulation.rho[idx]);
 		glVertex2f(px, py);
 		glEnd();
 	}
@@ -123,10 +124,56 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 	    for (j = 0; j < DIM; j++)
 	    {
 		  idx = (j * DIM) + i;
-		  direction_to_color(Simulation.vx[idx],Simulation.vy[idx],color_dir);
+		  direction_to_color(simulation.vx[idx],simulation.vy[idx],color_dir);
 		  glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-		  glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
+		  glVertex2f((wn + (fftw_real)i * wn) + vec_scale * simulation.vx[idx], (hn + (fftw_real)j * hn) + vec_scale * simulation.vy[idx]);
 	    }
 	  glEnd();
 	}
+}
+
+void Visualization::toggle_color()
+{
+	color_dir = 1 - color_dir;
+}
+
+void Visualization::change_hedgehog(double scale)
+{
+	vec_scale *= scale;
+}
+
+void Visualization::toggle_smoke()
+{
+	draw_smoke = 1 - draw_smoke;
+}
+
+bool Visualization::isSmoke() 
+{
+	return draw_smoke;
+}
+
+void Visualization::turn_vector(int turn)
+{
+	draw_vecs = turn;
+}
+
+void Visualization::toggle_vector()
+{
+	draw_vecs = 1 - draw_vecs;
+}
+
+bool Visualization::isVector()
+{
+	return draw_vecs;
+}
+
+void Visualization::turn_smoke(int turn)
+{
+	draw_smoke = turn;
+}
+
+void Visualization::toggle_scalarcol()
+{
+	scalar_col++; 
+	if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE;
 }

@@ -1,8 +1,8 @@
-#include "fluids.hpp"
+#include "Fluids.hpp"
 
 //main: The main program
 int main(int argc, char **argv)
 {
-	new fluids(argc, argv);
+	new Fluids(argc, argv);
 	return 0;
 }

@@ -7,16 +7,20 @@ class Simulation {
 public:
 	Simulation();
 	void init_simulation(int n);
+	void do_one_simulation_step(void);
+	void change_timestep(double step);
+	void change_viscosity(double viscosity);
+	void toggle_frozen();
+	void insert_forces(int X, int Y, double dx, double dy);
 
     static const int DIM = 50;				//size of simulation grid
+
 private:
-	int clamp(float x);
 	void FFT(int direction,void* vx);
 	float max(float x, float y);
 	void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, fftw_real visc, fftw_real dt);
 	void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *rho0, fftw_real dt);
 	void set_forces(void);
-	void do_one_simulation_step(void);
 
 		//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
 	int   frozen ;               //toggles on/off the animation
