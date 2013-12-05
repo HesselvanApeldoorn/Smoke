@@ -1,6 +1,11 @@
+#ifndef SIMULATION_HPP
+#define SIMULATION_HPP
+
 #include <string>
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <math.h>               //for various math functions
+#include "Util.hpp"
+#include <GL/glut.h>
 
 class Simulation {
 		friend class Visualization;		
@@ -32,3 +37,5 @@ private:
 	fftw_real *rho, *rho0;			//smoke density at the current (rho) and previous (rho0) moment
 	rfftwnd_plan plan_rc, plan_cr;  //simulation domain discretization
 };
+
+#endif

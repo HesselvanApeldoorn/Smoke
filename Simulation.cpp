@@ -1,7 +1,4 @@
-#include <GL/glut.h>
-
 #include "Simulation.hpp"
-#include "Util.hpp"
 
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
 
@@ -45,8 +42,7 @@ void Simulation::FFT(int direction,void* vx)
 	else             rfftwnd_one_complex_to_real(plan_cr,(fftw_complex*)vx,(fftw_real*)vx);
 }
 
-float Simulation::max(float x, float y)
-{ return x < y ? x : y; }
+
 
 //solve: Solve (compute) one step of the fluid flow simulation
 void Simulation::solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, fftw_real visc, fftw_real dt)

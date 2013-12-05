@@ -4,8 +4,8 @@
 
 
 #include "Fluids.hpp"
-#include "Util.hpp"
 
+using namespace std;
 
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
@@ -16,13 +16,10 @@ int Fluids::winHeight;
 
 int Fluids::main_window;
 
-//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
-// int   color_dir = 0;            //use direction color-coding or not
-// float vec_scale = 1000;			//scaling of hedgehogs
-// int   draw_smoke = 0;           //draw the smoke or not
-// int   draw_vecs = 1;            //draw the vector field or not
-
-
+GLUI_Checkbox   *checkbox;
+GLUI_Spinner    *spinner;
+GLUI_RadioGroup *radio;
+GLUI_EditText   *edittext;
 
 void Fluids::update()
 {
@@ -31,39 +28,116 @@ void Fluids::update()
 	glutPostRedisplay();
 }
 
+
 Fluids::Fluids(int argc, char **argv)
 {
-	printf("Fluid Flow Simulation and Visualization\n");
-	printf("=======================================\n");
-	printf("Click and drag the mouse to steer the flow!\n");
-	printf("T/t:   increase/decrease simulation timestep\n");
-	printf("S/s:   increase/decrease hedgehog scaling\n");
-	printf("c:     toggle direction coloring on/off\n");
-	printf("V/v:   increase decrease fluid viscosity\n");
-	printf("x:     toggle drawing matter on/off\n");
-	printf("y:     toggle drawing hedgehogs on/off\n");
-	printf("m:     toggle thru scalar coloring\n");
-	printf("a:     toggle the animation on/off\n");
-	printf("q:     quit\n\n");
+	Fluids::usage();
+
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(500,500);
+	
+	glutInitWindowPosition( 600, 250 );
+	glutInitWindowSize(1000,800);
 
 	main_window = glutCreateWindow("Real-time smoke simulation and visualization");
 
 	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutIdleFunc(update);
+	// glutReshapeFunc(reshape);
+	// glutIdleFunc(update);
+		// pass static functions as callback to GLUI
+	GLUI_Master.set_glutReshapeFunc(reshape);  
+	GLUI_Master.set_glutIdleFunc(update);
+
 	glutKeyboardFunc(keyboard);
 	glutMotionFunc(drag);
 
 
+
 	simulation.init_simulation(Simulation::DIM);	//initialize the simulation data structures
+
+	Fluids::build_gui();
+
 	glutMainLoop();			//calls do_one_simulation_step, keyboard, display, drag, reshape
 }
 
+void Fluids::usage()
+{
+	cout << "Fluid Flow Simulation and Visualization\n";
+	cout << "=======================================\n";
+	cout << "Click and drag the mouse to steer the flow!\n";
+	cout << "T/t:   increase/decrease simulation timestep\n";
+	cout << "S/s:   increase/decrease hedgehog scaling\n";
+	cout << "c:     toggle direction coloring on/off\n";
+	cout << "V/v:   increase decrease fluid viscosity\n";
+	cout << "x:     toggle drawing matter on/off\n";
+	cout << "y:     toggle drawing hedgehogs on/off\n";
+	cout << "m:     toggle thru scalar coloring\n";
+	cout << "a:     toggle the animation on/off\n";
+	cout << "q:     quit\n\n";
+}
 
+void Fluids::control_cb( int control )
+{
+  /********************************************************************
+    Here we'll print the user id of the control that generated the
+    callback, and we'll also explicitly get the values of each control.
+    Note that we really didn't have to explicitly get the values, since
+    they are already all contained within the live variables:
+    'wireframe',  'segments',  'obj',  and 'text'  
+    ********************************************************************/
+
+  printf( "callback: %d\n", control );
+  printf( "             checkbox: %d\n", checkbox->get_int_val() );
+  printf( "              spinner: %d\n", spinner->get_int_val() );
+  printf( "          radio group: %d\n", radio->get_int_val() );
+  printf( "                 text: %s\n", edittext->get_text() );
+  
+}
+/***************************************** myGlutIdle() ***********/
+
+void Fluids::myGlutIdle( void )
+{
+  /* According to the GLUT specification, the current window is 
+     undefined during an idle callback.  So we need to explicitly change
+     it if necessary */
+  if ( glutGetWindow() != main_window ) 
+    glutSetWindow(main_window);  
+
+  glutPostRedisplay();
+}
+void Fluids::build_gui()
+{
+
+	/** These are the live variables passed into GLUI ***/
+	int   wireframe = 0;
+	int   obj = 0;
+	int   segments = 8;
+	string text = "Hello World!";
+	GLUI *glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
+	glui->set_main_gfx_window(main_window);  // main_window is the main gfx window
+	new GLUI_StaticText( glui, "Options" );
+	new GLUI_Separator( glui );
+
+
+
+	checkbox = new GLUI_Checkbox( glui, "Color", &wireframe, 1, control_cb );
+	spinner  = new GLUI_Spinner( glui, "Segments:", &segments, 2, control_cb );
+	spinner->set_int_limits( 3, 60 );
+	edittext = new GLUI_EditText( glui, "Text:", text, 3, control_cb );
+	GLUI_Panel *obj_panel = new GLUI_Panel( glui, "Object Type" );
+	obj_panel->set_w(200);	
+	radio = new GLUI_RadioGroup( obj_panel,&obj,4,control_cb );
+	new GLUI_RadioButton( radio, "Sphere" );
+	new GLUI_RadioButton( radio, "Torus" );
+	new GLUI_RadioButton( radio, "Teapot" );
+	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit );
+ 
+
+  /* We register the idle callback with GLUI, *not* with GLUT */
+  // GLUI_Master.set_glutIdleFunc( myGlutIdle );
+  // GLUI_Master.set_glutIdleFunc( NULL );
+}
 
 //------ INTERACTION CODE STARTS HERE -----------------------------------------------------------------
 
@@ -76,11 +150,14 @@ void Fluids::display(void)
 	visualization.visualize(simulation, winWidth, winHeight);
 	glFlush();
 	glutSwapBuffers();
+
 }
 
 //reshape: Handle window resizing (reshaping) events
 void Fluids::reshape(int w, int h)
 {
+	GLUI_Master.auto_set_viewport();
+
  	glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -94,7 +171,7 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	  case 't': simulation.change_timestep(-0.001); break;
-	  case 'T': simulation.change_timestep(-0.001); break;
+	  case 'T': simulation.change_timestep(+0.001); break;
 	  case 'c': visualization.toggle_color(); break;
 	  case 'S': visualization.change_hedgehog(1.2); break;
 	  case 's': visualization.change_hedgehog(0.8); break;

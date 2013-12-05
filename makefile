@@ -12,14 +12,12 @@ INCLUDEDIRS = -I./fftw-2.1.5/include/
 LIBDIRS     = -L./fftw-2.1.5/lib/
 
 ## Linking flags, includes libraries used
-LDFLAGS     = -lrfftw -lfftw 
-
-# Was up in line 15 : -lglui 
+LDFLAGS     = -lrfftw -lfftw -lglui 
 
 #Possible flags for release (ffast-math uses less precision for floating-point numbers, check that your application can handle this)
 #CFLAGS      = -O3 -march=x86-64 -mtune=generic -DNDEBUG -mfpmath=sse -ffast-math -Wall -pipe
 #Debug flags
-CFLAGS      = -Wall -g -pedantic -Wno-deprecated -Wno-deprecated-declarations
+CFLAGS      = -Wall -g -pedantic
 LINKFLAGS   =
 
 ## Compiler to be used

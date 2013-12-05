@@ -1,10 +1,4 @@
-#include <math.h>
-#include <algorithm>
-#include <GL/glut.h>
-#include <rfftw.h>              //the numerical simulation FFTW library
-
 #include "Visualization.hpp"
-#include "Simulation.hpp"
 
 using namespace std;
 
@@ -57,7 +51,7 @@ void Visualization::direction_to_color(float x, float y, int method)
 	float r,g,b,f;
 	if (method)
 	{
-	  f = atan2(y,x) / 3.1415927 + 1;
+	  f = atan2(y,x) / M_PI + 1;
 	  r = f;
 	  if(r > 1) r = 2 - r;
 	  g = f + .66667;

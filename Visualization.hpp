@@ -1,3 +1,14 @@
+#ifndef VISUALIZATION_HPP
+#define VISUALIZATION_HPP
+
+#include <cmath>
+#include <algorithm>
+#include <GL/glut.h>
+#include <rfftw.h>              //the numerical simulation FFTW library
+
+#include "Util.hpp"
+#include "Simulation.hpp"
+
 class Simulation;
 class Visualization {
 
@@ -31,3 +42,5 @@ private:
 	int   draw_smoke;           //draw the smoke or not
 	int   draw_vecs;            //draw the vector field or not
 };
+
+#endif

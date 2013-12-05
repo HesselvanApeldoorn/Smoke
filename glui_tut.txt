@@ -1,0 +1,2 @@
+http://www.codeproject.com/Articles/20653/GLUI-Subwindow-Template
+http://www.codeproject.com/Articles/20286/GLUI-Window-Template
