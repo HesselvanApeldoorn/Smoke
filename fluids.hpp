@@ -22,7 +22,8 @@ private:
 	static void usage();
 	static void build_gui();
 	static void myGlutIdle( void );
-	static void control_cb( int control );
+	static void reset_values();
+	static void glui_callback( int control );
 
 	static void display(void);
 	static void reshape(int w, int h);

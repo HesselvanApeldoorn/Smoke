@@ -6,10 +6,11 @@ using namespace std;
 
 Visualization::Visualization()
 {
-	color_dir = 0;            //use direction color-coding or not
+	options[DrawColor] = false; // don't draw color
+	// color_dir = 0;            //use direction color-coding or not
 	vec_scale = 1000;			//scaling of hedgehogs
-	draw_smoke = 0;           //draw the smoke or not
-	draw_vecs = 1;            //draw the vector field or not
+	options[DrawSmoke] = false;           //draw the smoke or not
+	options[DrawVecs] = true;            //draw the vector field or not
 }
 
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
@@ -74,7 +75,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 	fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
 	fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
 
-	if (draw_smoke)
+	if (options[DrawSmoke])
 	{
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	for (j = 0; j < DIM - 1; j++)			//draw smoke
@@ -111,14 +112,14 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 	}
 	}
 
-	if (draw_vecs)
+	if (options[DrawVecs])
 	{
 	  glBegin(GL_LINES);				//draw velocities
 	  for (i = 0; i < DIM; i++)
 	    for (j = 0; j < DIM; j++)
 	    {
 		  idx = (j * DIM) + i;
-		  direction_to_color(simulation.vx[idx],simulation.vy[idx],color_dir);
+		  direction_to_color(simulation.vx[idx],simulation.vy[idx],options[DrawColor]);
 		  glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
 		  glVertex2f((wn + (fftw_real)i * wn) + vec_scale * simulation.vx[idx], (hn + (fftw_real)j * hn) + vec_scale * simulation.vy[idx]);
 	    }
@@ -126,45 +127,33 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 	}
 }
 
-void Visualization::toggle_color()
+void Visualization::toggle(Option option)
 {
-	color_dir = 1 - color_dir;
+	options[option] = !options[option];
 }
+
 
 void Visualization::change_hedgehog(double scale)
 {
 	vec_scale *= scale;
 }
 
-void Visualization::toggle_smoke()
+bool Visualization::is_enabled(Option option) 
 {
-	draw_smoke = 1 - draw_smoke;
+	return options[option];
 }
 
-bool Visualization::isSmoke() 
+void Visualization::enable(Option option) 
 {
-	return draw_smoke;
+	options[option] = true;
 }
 
-void Visualization::turn_vector(int turn)
+void Visualization::disable(Option option) 
 {
-	draw_vecs = turn;
+	options[option] = false;
 }
 
-void Visualization::toggle_vector()
-{
-	draw_vecs = 1 - draw_vecs;
-}
 
-bool Visualization::isVector()
-{
-	return draw_vecs;
-}
-
-void Visualization::turn_smoke(int turn)
-{
-	draw_smoke = turn;
-}
 
 void Visualization::toggle_scalarcol()
 {

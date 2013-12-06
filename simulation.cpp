@@ -167,7 +167,7 @@ void Simulation::do_one_simulation_step(void)
 	}
 }
 
-void Simulation::change_timestep(double step)
+void Simulation::change_timestep(float step)
 {
 	dt += step;
 }

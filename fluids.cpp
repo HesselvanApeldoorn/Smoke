@@ -7,6 +7,12 @@
 
 using namespace std;
 
+#define RESET_VALUES 0 //For resetting values in glui
+#define TIMESTEP 1 //For timestep spinner in glui
+#define HEDGEHOGSCALE 2 // For hedgehog spinner in glui
+#define VISCOSITY 3 // For viscosity spinner in glui
+
+
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
 
@@ -16,10 +22,10 @@ int Fluids::winHeight;
 
 int Fluids::main_window;
 
-GLUI_Checkbox   *checkbox;
-GLUI_Spinner    *spinner;
-GLUI_RadioGroup *radio;
-GLUI_EditText   *edittext;
+//Spinners in glui
+GLUI_Spinner *timestep_spinner;
+GLUI_Spinner *hedgehog_spinner;
+GLUI_Spinner *viscosity_spinner;
 
 void Fluids::update()
 {
@@ -73,57 +79,96 @@ void Fluids::usage()
 	cout << "q:     quit\n\n";
 }
 
-void Fluids::control_cb( int control )
+void Fluids::reset_values()
 {
-  /********************************************************************
-    Here we'll print the user id of the control that generated the
-    callback, and we'll also explicitly get the values of each control.
-    Note that we really didn't have to explicitly get the values, since
-    they are already all contained within the live variables:
-    'wireframe',  'segments',  'obj',  and 'text'  
-    ********************************************************************/
+	simulation.dt = 0.4;
+	visualization.disable(Visualization::DrawColor);
+	visualization.disable(Visualization::DrawSmoke);
+	visualization.enable(Visualization::DrawVecs);
+	visualization.vec_scale = 1000;
+	simulation.visc = 0.001;
+	simulation.frozen = false;
+	GLUI_Master.sync_live_all(); 	// sync live variables
 
-  printf( "callback: %d\n", control );
-  printf( "             checkbox: %d\n", checkbox->get_int_val() );
-  printf( "              spinner: %d\n", spinner->get_int_val() );
-  printf( "          radio group: %d\n", radio->get_int_val() );
-  printf( "                 text: %s\n", edittext->get_text() );
+}
+
+
+void Fluids::glui_callback( int control )
+{
+    switch(control)
+    {
+    	case RESET_VALUES: reset_values();break;
+    	case TIMESTEP: simulation.dt = timestep_spinner->get_float_val(); break;
+    	case HEDGEHOGSCALE: visualization.vec_scale = hedgehog_spinner->get_float_val(); break;
+		case VISCOSITY: simulation.visc = viscosity_spinner->get_float_val(); break;
+		
+    }
+
   
 }
 
 void Fluids::build_gui()
 {
-
-	/** These are the live variables passed into GLUI ***/
-	int   wireframe = 0;
-	int   obj = 0;
-	int   segments = 8;
-	string text = "Hello World!";
 	GLUI *glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
 	glui->set_main_gfx_window(main_window);  // main_window is the main gfx window
-	
-	new GLUI_StaticText( glui, "Options" );
-	new GLUI_Separator( glui );
 
 
+	GLUI_Panel *options_panel = glui->add_panel("Options");	
+	glui->add_checkbox_to_panel(options_panel, "Draw Color", &visualization.options[Visualization::DrawColor] );
+	glui->add_checkbox_to_panel(options_panel, "Draw Smoke", &visualization.options[Visualization::DrawSmoke] );
+	glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
+	glui->add_checkbox_to_panel(options_panel, "Freeze", &simulation.frozen );
 
-	checkbox = new GLUI_Checkbox( glui, "Color", &wireframe, 1, control_cb );
-	spinner  = new GLUI_Spinner( glui, "Segments:", &segments, 2, control_cb );
-	spinner->set_int_limits( 3, 60 );
-	edittext = new GLUI_EditText( glui, "Text:", text, 3, control_cb );
-	GLUI_Panel *obj_panel = new GLUI_Panel( glui, "Object Type" );
-	obj_panel->set_w(200);	
-	radio = new GLUI_RadioGroup( obj_panel,&obj,4,control_cb );
-	new GLUI_RadioButton( radio, "Sphere" );
-	new GLUI_RadioButton( radio, "Torus" );
-	new GLUI_RadioButton( radio, "Teapot" );
-	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit );
- 
+	//Time step spinner
+	timestep_spinner = glui->add_spinner("Time Step",GLUI_SPINNER_FLOAT , &simulation.dt, TIMESTEP, glui_callback );
+	timestep_spinner->set_speed(0.001); 
+	timestep_spinner->set_float_limits(0,100);
+	timestep_spinner->set_float_val(simulation.dt);
 
-  /* We register the idle callback with GLUI, *not* with GLUT */
-  // GLUI_Master.set_glutIdleFunc( myGlutIdle );
-  // GLUI_Master.set_glutIdleFunc( NULL );
+	//Hedgehog scale spinner
+	hedgehog_spinner = glui->add_spinner("Hedgehog Scale",GLUI_SPINNER_FLOAT , &visualization.vec_scale, HEDGEHOGSCALE, glui_callback );
+	hedgehog_spinner->set_speed(1); 
+	hedgehog_spinner->set_float_limits(0,50000);
+	hedgehog_spinner->set_float_val(visualization.vec_scale);
+
+	//Fluid viscosity spinner
+	viscosity_spinner = glui->add_spinner("Fluid viscosity",GLUI_SPINNER_FLOAT , &simulation.visc, VISCOSITY, glui_callback );
+	viscosity_spinner->set_speed(0.1); 
+	viscosity_spinner->set_float_limits(0.001,100);
+	viscosity_spinner->set_float_val(simulation.visc);
+
+	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
+	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
 }
+
+//keyboard: Handle key presses
+void Fluids::keyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	  case 't': simulation.change_timestep(-0.001); break;
+	  case 'T': simulation.change_timestep(+0.001); break;
+	  case 'c': visualization.toggle(Visualization::DrawColor); break;
+	  case 'S': visualization.change_hedgehog(1.2); break;
+	  case 's': visualization.change_hedgehog(0.8); break;
+	  case 'V': simulation.change_viscosity(5); break;
+	  case 'v': simulation.change_viscosity(0.2);; break;
+	  case 'x': visualization.toggle(Visualization::DrawSmoke);
+		    if (visualization.is_enabled(Visualization::DrawSmoke))
+		    	visualization.enable(Visualization::DrawVecs); break;
+	  case 'y': visualization.toggle(Visualization::DrawVecs);
+		    if (visualization.is_enabled(Visualization::DrawVecs))
+		    	visualization.enable(Visualization::DrawSmoke); break;
+	  case 'm': visualization.toggle_scalarcol(); break;
+	  case 'a': simulation.toggle_frozen(); break;
+  	  case 'r': reset_values();
+	  case 'q': exit(0);
+	}
+
+	GLUI_Master.sync_live_all(); 	// sync live variables
+
+}
+
 
 //------ INTERACTION CODE STARTS HERE -----------------------------------------------------------------
 
@@ -151,29 +196,6 @@ void Fluids::reshape(int w, int h)
 	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
 	winWidth = w; winHeight = h;
 }
-
-//keyboard: Handle key presses
-void Fluids::keyboard(unsigned char key, int x, int y)
-{
-	switch (key)
-	{
-	  case 't': simulation.change_timestep(-0.001); break;
-	  case 'T': simulation.change_timestep(+0.001); break;
-	  case 'c': visualization.toggle_color(); break;
-	  case 'S': visualization.change_hedgehog(1.2); break;
-	  case 's': visualization.change_hedgehog(0.8); break;
-	  case 'V': simulation.change_viscosity(5); break;
-	  case 'v': simulation.change_viscosity(0.2);; break;
-	  case 'x': visualization.toggle_smoke();
-		    if (visualization.isSmoke()==0) visualization.turn_vector(1); break;
-	  case 'y': visualization.toggle_vector();
-		    if (visualization.isVector()==0) visualization.turn_smoke(1); break;
-	  case 'm': visualization.toggle_scalarcol(); break;
-	  case 'a': simulation.toggle_frozen(); break;
-	  case 'q': exit(0);
-	}
-}
-
 
 
 // drag: When the user drags with the mouse, add a force that corresponds to the direction of the mouse

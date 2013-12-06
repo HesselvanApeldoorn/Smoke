@@ -17,12 +17,15 @@ public:
 	Simulation();
 	void init_simulation(int n);
 	void do_one_simulation_step(void);
-	void change_timestep(double step);
+	void change_timestep(float step);
 	void change_viscosity(double viscosity);
 	void toggle_frozen();
 	void insert_forces(int X, int Y, double dx, double dy);
 
     static const int DIM = 50;				//size of simulation grid
+	float dt;				//simulation time step
+	float visc;				//fluid viscosity
+	int   frozen ;               //toggles on/off the animation
 
 private:
 	void FFT(int direction,void* vx);
@@ -32,9 +35,6 @@ private:
 	void set_forces(void);
 
 	//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
-	int   frozen ;               //toggles on/off the animation
-	double dt;				//simulation time step
-	float visc;				//fluid viscosity
 	fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
 	fftw_real *vx0, *vy0;           //(vx0,vy0) = velocity field at the previous moment
 	fftw_real *fx, *fy;	            //(fx,fy)   = user-controlled simulation forces, steered with the mouse
