@@ -1,12 +1,12 @@
-#include <stdio.h>              //for printing the help text
-#include <rfftw.h>              //the numerical simulation FFTW library
+#include <GL/glui.h>
 #include <GL/glut.h>            //the GLUT graphics library
 #include <iostream>
-#include <GL/glui.h>
+#include <rfftw.h>              //the numerical simulation FFTW library
+#include <stdio.h>              //for printing the help text
 
-#include "Visualization.hpp"
-#include "Simulation.hpp"
-#include "Util.hpp"
+#include "simulation.hpp"
+#include "util.hpp"
+#include "visualization.hpp"
 
 class Fluids
 {

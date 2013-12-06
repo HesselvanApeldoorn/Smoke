@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------
 
 
-#include "Fluids.hpp"
+#include "fluids.hpp"
 
 using namespace std;
 
@@ -37,21 +37,17 @@ Fluids::Fluids(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	
-	glutInitWindowPosition( 600, 250 );
+	glutInitWindowPosition( 400, 250 );
 	glutInitWindowSize(1000,800);
 
 	main_window = glutCreateWindow("Real-time smoke simulation and visualization");
 
 	glutDisplayFunc(display);
-	// glutReshapeFunc(reshape);
-	// glutIdleFunc(update);
-		// pass static functions as callback to GLUI
+	glutMotionFunc(drag);
+	glutKeyboardFunc(keyboard);
+
 	GLUI_Master.set_glutReshapeFunc(reshape);  
 	GLUI_Master.set_glutIdleFunc(update);
-
-	glutKeyboardFunc(keyboard);
-	glutMotionFunc(drag);
-
 
 
 	simulation.init_simulation(Simulation::DIM);	//initialize the simulation data structures
@@ -94,18 +90,7 @@ void Fluids::control_cb( int control )
   printf( "                 text: %s\n", edittext->get_text() );
   
 }
-/***************************************** myGlutIdle() ***********/
 
-void Fluids::myGlutIdle( void )
-{
-  /* According to the GLUT specification, the current window is 
-     undefined during an idle callback.  So we need to explicitly change
-     it if necessary */
-  if ( glutGetWindow() != main_window ) 
-    glutSetWindow(main_window);  
-
-  glutPostRedisplay();
-}
 void Fluids::build_gui()
 {
 
@@ -116,6 +101,7 @@ void Fluids::build_gui()
 	string text = "Hello World!";
 	GLUI *glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
 	glui->set_main_gfx_window(main_window);  // main_window is the main gfx window
+	
 	new GLUI_StaticText( glui, "Options" );
 	new GLUI_Separator( glui );
 
@@ -156,9 +142,10 @@ void Fluids::display(void)
 //reshape: Handle window resizing (reshaping) events
 void Fluids::reshape(int w, int h)
 {
-	GLUI_Master.auto_set_viewport();
+	//TODO: Bug in drawing position...!!
+	GLUI_Master.auto_set_viewport(); // Compensation for subwindows
 
- 	glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
+ 	// glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);

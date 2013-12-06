@@ -1,14 +1,18 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
-#include <string>
-#include <rfftw.h>              //the numerical simulation FFTW library
-#include <math.h>               //for various math functions
-#include "Util.hpp"
 #include <GL/glut.h>
+#include <math.h>               //for various math functions
+#include <rfftw.h>              //the numerical simulation FFTW library
+#include <string>
+
+#include "util.hpp"
+
 
 class Simulation {
-		friend class Visualization;		
+
+friend class Visualization;		
+
 public:
 	Simulation();
 	void init_simulation(int n);
@@ -27,7 +31,7 @@ private:
 	void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *rho0, fftw_real dt);
 	void set_forces(void);
 
-		//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
+	//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
 	int   frozen ;               //toggles on/off the animation
 	double dt;				//simulation time step
 	float visc;				//fluid viscosity

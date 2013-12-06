@@ -1,1 +1,1 @@
-Fluids.o: Fluids.cpp
+fluids.o: fluids.cpp

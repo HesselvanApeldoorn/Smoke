@@ -1,4 +1,4 @@
-#include "Visualization.hpp"
+#include "visualization.hpp"
 
 using namespace std;
 

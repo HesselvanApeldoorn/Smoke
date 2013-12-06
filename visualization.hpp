@@ -1,15 +1,16 @@
 #ifndef VISUALIZATION_HPP
 #define VISUALIZATION_HPP
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <GL/glut.h>
 #include <rfftw.h>              //the numerical simulation FFTW library
 
-#include "Util.hpp"
-#include "Simulation.hpp"
+#include "simulation.hpp"
+#include "util.hpp"
 
 class Simulation;
+
 class Visualization {
 
 public:
@@ -36,11 +37,12 @@ private:
 	static const int COLOR_BANDS=2;
 
 
-//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
+	//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
 	int   color_dir;            //use direction color-coding or not
 	float vec_scale;			//scaling of hedgehogs
 	int   draw_smoke;           //draw the smoke or not
 	int   draw_vecs;            //draw the vector field or not
+
 };
 
 #endif
