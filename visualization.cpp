@@ -35,7 +35,7 @@ void Visualization::set_colormap(float vy)
 		case Rainbow: {rainbow(vy,&R,&G,&B);} break;
 
    	}
-   	
+
    // if (scalar_col==COLOR_BLACKWHITE)
    // 	R = G = B = vy;
    // else if (scalar_col==COLOR_RAINBOW)
@@ -72,6 +72,16 @@ void Visualization::direction_to_color(float x, float y, int method)
 	else
 	{ r = g = b = 1; }
 	glColor3f(r,g,b);
+}
+
+// Display color legend for current colormap
+void Visualization::display_legend()
+{
+	switch(selected_colormap)
+	{
+		case BlackWhite: {} break;
+		case Rainbow: {} break;
+	}
 }
 
 //visualize: This is the main visualization function
@@ -132,6 +142,10 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 	    }
 	  glEnd();
 	}
+
+	// Draw color legend
+	display_legend();
+
 }
 
 void Visualization::toggle(Option option)

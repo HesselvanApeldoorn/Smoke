@@ -88,6 +88,10 @@ void Fluids::reset_values()
 	visualization.vec_scale = 1000;
 	simulation.visc = 0.001;
 	simulation.frozen = false;
+	visualization.selected_colormap = Visualization::BlackWhite;
+
+
+
 	GLUI_Master.sync_live_all(); 	// sync live variables
 
 }
