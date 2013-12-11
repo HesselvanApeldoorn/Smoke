@@ -17,6 +17,13 @@ friend class Fluids;
 
 public:
 
+	enum ColorMap
+	{
+		BlackWhite,
+		Rainbow
+
+	};
+
 	enum Option
 	{
 		DrawColor, 		//use direction color-coding or not
@@ -40,11 +47,12 @@ public:
 	void toggle_scalarcol();
 
 	float vec_scale;			//scaling of hedgehogs
+	int selected_colormap;
 
 
 
 private:
-	int scalar_col;           //method for scalar coloring
+	//int scalar_col;           //method for scalar coloring
 	static const int COLOR_BLACKWHITE=0;   //different types of color mapping: black-and-white, rainbow, banded
 	static const int COLOR_RAINBOW=1;
 	static const int COLOR_BANDS=2;

@@ -11,6 +11,7 @@ Visualization::Visualization()
 	vec_scale = 1000;			//scaling of hedgehogs
 	options[DrawSmoke] = false;           //draw the smoke or not
 	options[DrawVecs] = true;            //draw the vector field or not
+	selected_colormap = BlackWhite;
 }
 
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
@@ -27,18 +28,24 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 //set_colormap: Sets three different types of colormaps
 void Visualization::set_colormap(float vy)
 {
-   float R,G,B;
+   	float R,G,B;
+	switch(selected_colormap)
+   	{
+		case BlackWhite: {R = G = B = vy;} break;
+		case Rainbow: {rainbow(vy,&R,&G,&B);} break;
 
-   if (scalar_col==COLOR_BLACKWHITE)
-       R = G = B = vy;
-   else if (scalar_col==COLOR_RAINBOW)
-       rainbow(vy,&R,&G,&B);
-   else if (scalar_col==COLOR_BANDS)
-       {
-          const int NLEVELS = 7;
-          vy *= NLEVELS; vy = (int)(vy); vy/= NLEVELS;
-	      rainbow(vy,&R,&G,&B);
-	   }
+   	}
+   	
+   // if (scalar_col==COLOR_BLACKWHITE)
+   // 	R = G = B = vy;
+   // else if (scalar_col==COLOR_RAINBOW)
+   //     rainbow(vy,&R,&G,&B);
+   // else if (scalar_col==COLOR_BANDS)
+   //     {
+   //        const int NLEVELS = 7;
+   //        vy *= NLEVELS; vy = (int)(vy); vy/= NLEVELS;
+	  //     rainbow(vy,&R,&G,&B);
+	  //  }
 
    glColor3f(R,G,B);
 }
@@ -155,8 +162,8 @@ void Visualization::disable(Option option)
 
 
 
-void Visualization::toggle_scalarcol()
-{
-	scalar_col++; 
-	if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE;
-}
+// void Visualization::toggle_scalarcol()
+// {
+// 	scalar_col++; 
+// 	if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE;
+// }

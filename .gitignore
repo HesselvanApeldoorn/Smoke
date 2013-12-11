@@ -1,3 +1,4 @@
 *.d
 *.o
+smoke
 fftw-2.1.5
