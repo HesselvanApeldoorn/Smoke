@@ -20,8 +20,8 @@ public:
 	enum ColorMap
 	{
 		BlackWhite,
-		Rainbow
-
+		Rainbow,
+		RedWhite
 	};
 
 	enum Option
@@ -58,6 +58,7 @@ private:
 	static const int COLOR_BLACKWHITE=0;   //different types of color mapping: black-and-white, rainbow, banded
 	static const int COLOR_RAINBOW=1;
 	static const int COLOR_BANDS=2;
+	static const int COLOR_REDWHITE=3;
 	int options[OptionSize];
 
 	//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

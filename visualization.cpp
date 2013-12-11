@@ -33,7 +33,7 @@ void Visualization::set_colormap(float vy)
    	{
 		case BlackWhite: {R = G = B = vy;} break;
 		case Rainbow: {rainbow(vy,&R,&G,&B);} break;
-
+		case RedWhite: {rainbow(vy, &R,&R, &R);} break;
    	}
 
    // if (scalar_col==COLOR_BLACKWHITE)
@@ -81,6 +81,7 @@ void Visualization::display_legend()
 	{
 		case BlackWhite: {} break;
 		case Rainbow: {} break;
+		case RedWhite: {} break;
 	}
 }
 

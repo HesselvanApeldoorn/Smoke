@@ -146,6 +146,7 @@ void Fluids::build_gui()
 	GLUI_RadioGroup *color_radio = glui->add_radiogroup_to_panel(color_panel, &visualization.selected_colormap);
 	glui->add_radiobutton_to_group(color_radio, "Black/White");
 	glui->add_radiobutton_to_group(color_radio, "Rainbow");
+	glui->add_radiobutton_to_group(color_radio, "Red/White");
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
