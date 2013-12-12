@@ -52,7 +52,8 @@ public:
 
 
 private:
-	void display_legend();
+	void draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3]);
+	void display_legend(int winWidth, int winHeight);
 
 	//int scalar_col;           //method for scalar coloring
 	static const int COLOR_BLACKWHITE=0;   //different types of color mapping: black-and-white, rainbow, banded
