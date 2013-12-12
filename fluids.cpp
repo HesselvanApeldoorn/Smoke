@@ -43,7 +43,7 @@ Fluids::Fluids(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	
-	glutInitWindowPosition( 400, 250 );
+	glutInitWindowPosition( 400, 200 );
 	glutInitWindowSize(1000,800);
 
 	main_window = glutCreateWindow("Real-time smoke simulation and visualization");
@@ -172,7 +172,7 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 		    	visualization.enable(Visualization::DrawSmoke); break;
 	  //case 'm': visualization.toggle_scalarcol(); break;
 	  case 'a': simulation.toggle_frozen(); break;
-  	  case 'r': reset_values();
+  	  case 'r': reset_values(); break;
 	  case 'q': exit(0);
 	}
 

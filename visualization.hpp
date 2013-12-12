@@ -5,9 +5,12 @@
 #include <cmath>
 #include <GL/glut.h>
 #include <rfftw.h>              //the numerical simulation FFTW library
+#include <string>
 
 #include "simulation.hpp"
 #include "util.hpp"
+
+using namespace std;
 
 class Simulation;
 
@@ -54,6 +57,7 @@ public:
 private:
 	void draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3]);
 	void display_legend(int winWidth, int winHeight);
+	void draw_string(string text, int x, int y);
 
 	//int scalar_col;           //method for scalar coloring
 	static const int COLOR_BLACKWHITE=0;   //different types of color mapping: black-and-white, rainbow, banded

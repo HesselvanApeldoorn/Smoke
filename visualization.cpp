@@ -1,6 +1,5 @@
 #include "visualization.hpp"
 
-using namespace std;
 
 //------ VISUALIZATION CODE STARTS HERE -----------------------------------------------------------------
 
@@ -73,19 +72,32 @@ void Visualization::direction_to_color(float x, float y, int method)
     { r = g = b = 1; }
     glColor3f(r,g,b);
 }
+
+void Visualization::draw_string(string text, int x, int y)
+{
+    glRasterPos2i(x,y);
+    for(int i = 0; i < (int) text.length(); i++){ 
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, text.data()[i]);
+    }
+}
+
 void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3])
 {
-    int i;
     int barHeight = 20;
     int bottomSpace = 10;
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     int barWidth = winWidth/2;
     int barPiece = barWidth/nrRect;
-    for(i=0; i<nrRect;i++)
+
+    glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
+    draw_string("0", winWidth/4,barHeight+bottomSpace+5);
+
+    for(int i=0; i<nrRect;i++)
     {
         int barStart = winWidth/4+i*barPiece;
         glBegin(GL_QUADS); //Begin gl_quads
+
         glColor3f(rgbValues[i][0],rgbValues[i][1],rgbValues[i][2] );
         glVertex2f(barStart, barHeight+bottomSpace);  //Top left
         glVertex2f(barStart, bottomSpace); // Bottom left
@@ -95,6 +107,9 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
 
         glEnd(); //End gl_quads
     }
+    
+    glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
+    draw_string("1", 3*winWidth/4,barHeight+bottomSpace+5);
     
 
 }
@@ -112,7 +127,10 @@ void Visualization::display_legend(int winWidth, int winHeight)
             float rgbValues[3][3] = {{0,0,1}, {0,1,0},{1,0,0}};
             draw_gradient(2,winWidth, winHeight, rgbValues);
         } break;
-        case RedWhite: {} break;
+        case RedWhite: {
+            float rgbValues[2][3] = {{1,1,1}, {1,0,0}};
+            draw_gradient(1,winWidth, winHeight, rgbValues);
+        } break;
     }
 }
 
@@ -176,8 +194,10 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     }
 
     // Draw color legend
-    display_legend(winWidth, winHeight);
-
+    if(options[DrawSmoke]) 
+    {
+      display_legend(winWidth, winHeight);
+    }
 }
 
 void Visualization::toggle(Option option)
