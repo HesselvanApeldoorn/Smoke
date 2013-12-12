@@ -22,6 +22,7 @@ int Fluids::winHeight;
 
 int Fluids::main_window;
 
+const int Fluids::GUI_WIDTH = 200;
 //Spinners in glui
 GLUI_Spinner *timestep_spinner;
 GLUI_Spinner *hedgehog_spinner;
@@ -74,8 +75,9 @@ void Fluids::usage()
 	cout << "V/v:   increase decrease fluid viscosity\n";
 	cout << "x:     toggle drawing matter on/off\n";
 	cout << "y:     toggle drawing hedgehogs on/off\n";
-	cout << "m:     toggle thru scalar coloring\n";
+	// cout << "m:     toggle thru scalar coloring\n";
 	cout << "a:     toggle the animation on/off\n";
+	cout << "r:     Reset to default parameters\n";
 	cout << "q:     quit\n\n";
 }
 
@@ -122,6 +124,7 @@ void Fluids::build_gui()
 	glui->add_checkbox_to_panel(options_panel, "Draw Smoke", &visualization.options[Visualization::DrawSmoke] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
 	glui->add_checkbox_to_panel(options_panel, "Freeze", &simulation.frozen );
+	options_panel->set_w(Fluids::GUI_WIDTH);
 
 	//Time step spinner
 	timestep_spinner = glui->add_spinner("Time Step",GLUI_SPINNER_FLOAT , &simulation.dt, TIMESTEP, glui_callback );
@@ -217,7 +220,7 @@ void Fluids::drag(int mx, int my)
 	static int lmx=0,lmy=0;				//remembers last mouse location
 
 	// Compute the array index that corresponds to the cursor location
-	xi = (int)clamp((double)(Simulation::DIM + 1) * ((double)mx / (double)winWidth));
+	xi = (int)clamp((double)(Simulation::DIM + 1) * ((double)mx / (double)(winWidth-Fluids::GUI_WIDTH)));
 	yi = (int)clamp((double)(Simulation::DIM + 1) * ((double)(winHeight - my) / (double)winHeight));
 
 	X = xi; Y = yi;

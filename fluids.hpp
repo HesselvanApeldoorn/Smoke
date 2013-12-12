@@ -17,7 +17,7 @@ public:
 private:
 	static Simulation simulation;
 	static Visualization visualization;
-
+	static const int GUI_WIDTH;
 	static void update(void);
 	static void usage();
 	static void build_gui();

@@ -3,6 +3,5 @@
 
 
 int clamp(float x);
-float max(float x, float y);
 
 #endif

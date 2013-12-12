@@ -8,9 +8,9 @@ Visualization::Visualization()
     options[DrawColor] = false; // don't draw color
     // color_dir = 0;            //use direction color-coding or not
     vec_scale = 1000;           //scaling of hedgehogs
-    options[DrawSmoke] = false;           //draw the smoke or not
-    options[DrawVecs] = true;            //draw the vector field or not
-    selected_colormap = BlackWhite;
+    options[DrawSmoke] = true;           //draw the smoke or not
+    options[DrawVecs] = false;            //draw the vector field or not
+    selected_colormap = Rainbow;
 }
 
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
@@ -19,9 +19,9 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
    const float dx=0.8;
    if (value<0) value=0; if (value>1) value=1;
    value = (6-2*dx)*value+dx;
-   *R = max(0.0,(3-fabs(value-4)-fabs(value-5))/2);
-   *G = max(0.0,(4-fabs(value-2)-fabs(value-4))/2);
-   *B = max(0.0,(3-fabs(value-1)-fabs(value-2))/2);
+   *R = max(0.0f,(3-fabs(value-4)-fabs(value-5))/2);
+   *G = max(0.0f,(4-fabs(value-2)-fabs(value-4))/2);
+   *B = max(0.0f,(3-fabs(value-1)-fabs(value-2))/2);
 }
 
 //set_colormap: Sets three different types of colormaps
@@ -61,10 +61,10 @@ void Visualization::direction_to_color(float x, float y, int method)
       f = atan2(y,x) / M_PI + 1;
       r = f;
       if(r > 1) r = 2 - r;
-      g = f + .66667;
+      g = f + (2/3);
       if(g > 2) g -= 2;
       if(g > 1) g = 2 - g;
-      b = f + 2 * .66667;
+      b = f + 2 * (2/3);
       if(b > 2) b -= 2;
       if(b > 1) b = 2 - b;
     }
@@ -90,9 +90,8 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
     int barWidth = winWidth/2;
     int barPiece = barWidth/nrRect;
 
-    glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
-    draw_string("0", winWidth/4,barHeight+bottomSpace+5);
-
+   
+    //Draw rectangles inluding gradient
     for(int i=0; i<nrRect;i++)
     {
         int barStart = winWidth/4+i*barPiece;
@@ -107,8 +106,10 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
 
         glEnd(); //End gl_quads
     }
-    
+
+    // Draw numbers
     glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
+    draw_string("0", winWidth/4,barHeight+bottomSpace+5);
     draw_string("1", 3*winWidth/4,barHeight+bottomSpace+5);
     
 
@@ -137,8 +138,8 @@ void Visualization::display_legend(int winWidth, int winHeight)
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
-    int        i, j, idx; double px,py;
-        const int DIM = Simulation::DIM;
+    int i, j, idx; double px,py;
+    const int DIM = Simulation::DIM;
     fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
 
