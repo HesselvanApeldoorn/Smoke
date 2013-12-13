@@ -8,6 +8,7 @@ Visualization::Visualization()
     options[DrawColor] = false; // don't draw color
     // color_dir = 0;            //use direction color-coding or not
     vec_scale = 1000;           //scaling of hedgehogs
+    number_of_colors = 256;     // number of colors used
     options[DrawSmoke] = true;           //draw the smoke or not
     options[DrawVecs] = false;            //draw the vector field or not
     selected_colormap = Rainbow;
@@ -18,27 +19,8 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 {
    const float dx=0.8;
    if (value<0) value=0; if (value>1) value=1;
-      // cout << value << "\n";
 
    value = (6-2*dx)*value+dx;
-   // 5.2
-   //3-1.2 - 0.2
-   // G= 4-3.2 - 1.2
-   // B= 0
-
-   //v=0.5
-   //
-
-   //fire
-   //wit 1,1,1
-   //gee 1,1,0
-   //roo 1,0,0
-   //zwa 0,0,0
-
-   //rainbow
-   //r 1,0,0
-   //g 0,1,0
-   //b 0,0,1
    *R = max(0.0f,(3-fabs(value-4)-fabs(value-5))/2);
    *G = max(0.0f,(4-fabs(value-2)-fabs(value-4))/2);
    *B = max(0.0f,(3-fabs(value-1)-fabs(value-2))/2);
@@ -47,14 +29,8 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::fire(float value,float* R,float* G,float* B)
 {
-   if (value<0) value=0; if (value>1) value=1;
-
-   //fire
-   //white 1,1,1
-   //yellow 1,1,0
-   //red 1,0,0
-   //black 0,0,0
-  if(value>=1) {
+  if (value<0) value=0; if (value>1) value=1;
+  if(value>=0.7) {
     *R = 0.8;
     *G = 0.8;
     *B = 0.8;
@@ -83,9 +59,10 @@ void Visualization::set_colormap(float vy)
         case Rainbow: {rainbow(vy,&R,&G,&B);} break;
         case RedWhite: {R=1;G=1-vy; B=1-vy;} break;
         case Fire: {fire(vy,&R,&G,&B);} break;
-
-
     }
+    R = round(R*(number_of_colors-1))/(number_of_colors-1);
+    G = round(G*(number_of_colors-1))/(number_of_colors-1);
+    B = round(B*(number_of_colors-1))/(number_of_colors-1);
 
    // if (scalar_col==COLOR_BLACKWHITE)
    //   R = G = B = vy;

@@ -11,7 +11,7 @@ using namespace std;
 #define TIMESTEP 1 //For timestep spinner in glui
 #define HEDGEHOGSCALE 2 // For hedgehog spinner in glui
 #define VISCOSITY 3 // For viscosity spinner in glui
-
+#define NUMBEROFCOLORS 4 // For viscosity spinner in glui
 
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
@@ -27,6 +27,7 @@ const int Fluids::GUI_WIDTH = 200;
 GLUI_Spinner *timestep_spinner;
 GLUI_Spinner *hedgehog_spinner;
 GLUI_Spinner *viscosity_spinner;
+GLUI_Spinner *nrcolor_spinner;
 
 void Fluids::update()
 {
@@ -107,7 +108,7 @@ void Fluids::glui_callback( int control )
     	case TIMESTEP: simulation.dt = timestep_spinner->get_float_val(); break;
     	case HEDGEHOGSCALE: visualization.vec_scale = hedgehog_spinner->get_float_val(); break;
 		case VISCOSITY: simulation.visc = viscosity_spinner->get_float_val(); break;
-		
+		case NUMBEROFCOLORS: visualization.number_of_colors = nrcolor_spinner->get_int_val(); break;
     }
 
   
@@ -143,6 +144,12 @@ void Fluids::build_gui()
 	viscosity_spinner->set_speed(0.1); 
 	viscosity_spinner->set_float_limits(0.001,100);
 	viscosity_spinner->set_float_val(simulation.visc);
+
+	//number of colors spinner
+	nrcolor_spinner = glui->add_spinner("Number of colors",GLUI_SPINNER_INT , &visualization.number_of_colors, NUMBEROFCOLORS, glui_callback );
+	nrcolor_spinner->set_speed(1); 
+	nrcolor_spinner->set_int_limits(2,256);
+	nrcolor_spinner->set_int_val(visualization.number_of_colors);
 
 	GLUI_Panel *color_panel = glui->add_panel("Color map");	
 	// the radio buttons

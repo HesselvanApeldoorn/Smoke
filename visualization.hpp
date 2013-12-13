@@ -52,6 +52,7 @@ public:
 	void toggle_scalarcol();
 
 	float vec_scale;			//scaling of hedgehogs
+	int number_of_colors;
 	int selected_colormap;
 
 
