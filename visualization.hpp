@@ -24,7 +24,8 @@ public:
 	{
 		BlackWhite,
 		Rainbow,
-		RedWhite
+		RedWhite,
+		Fire
 	};
 
 	enum Option
@@ -39,6 +40,7 @@ public:
 	void set_colormap(float vy);
 	void visualize(Simulation const &simulation, int winWidth, int winHeight);
 	void rainbow(float value,float* R,float* G,float* B);
+	void fire(float value,float* R,float* G,float* B);
 	void direction_to_color(float x, float y, int method);
 	void toggle(Option option);
 	bool is_enabled(Option option);
