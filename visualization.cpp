@@ -12,6 +12,8 @@ Visualization::Visualization()
     options[DrawSmoke] = true;           //draw the smoke or not
     options[DrawVecs] = false;            //draw the vector field or not
     selected_colormap = Rainbow;
+    clamp_min = 1;
+    clamp_max = 256;
 }
 
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
@@ -63,6 +65,16 @@ void Visualization::set_colormap(float vy)
     R = round(R*(number_of_colors-1))/(number_of_colors-1);
     G = round(G*(number_of_colors-1))/(number_of_colors-1);
     B = round(B*(number_of_colors-1))/(number_of_colors-1);
+
+    //clamping
+    //max
+    R = min(R,clamp_max/256.0f);
+    G = min(G,clamp_max/256.0f);
+    B = min(B,clamp_max/256.0f);
+    //min
+    R = max(R,clamp_min/256.0f);
+    G = max(G,clamp_min/256.0f);
+    B = max(B,clamp_min/256.0f);
 
    // if (scalar_col==COLOR_BLACKWHITE)
    //   R = G = B = vy;

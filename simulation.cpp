@@ -4,7 +4,7 @@
 
 Simulation::Simulation()
 {
-	dt = 0.1;				//simulation time step
+	dt = 0.5;				//simulation time step
 	visc = 0.001;
 	frozen = 0;
 }

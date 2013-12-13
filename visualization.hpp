@@ -54,6 +54,8 @@ public:
 	float vec_scale;			//scaling of hedgehogs
 	int number_of_colors;
 	int selected_colormap;
+	float clamp_min;
+	float clamp_max;
 
 
 

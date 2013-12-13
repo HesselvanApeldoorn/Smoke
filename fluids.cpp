@@ -12,6 +12,8 @@ using namespace std;
 #define HEDGEHOGSCALE 2 // For hedgehog spinner in glui
 #define VISCOSITY 3 // For viscosity spinner in glui
 #define NUMBEROFCOLORS 4 // For viscosity spinner in glui
+#define CLAMPMIN 5 // For clamp min spinner in glui
+#define CLAMPMAX 6 // For clamp min spinner in glui
 
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
@@ -28,6 +30,8 @@ GLUI_Spinner *timestep_spinner;
 GLUI_Spinner *hedgehog_spinner;
 GLUI_Spinner *viscosity_spinner;
 GLUI_Spinner *nrcolor_spinner;
+GLUI_Spinner *clampmin_spinner;
+GLUI_Spinner *clampmax_spinner;
 
 void Fluids::update()
 {
@@ -93,7 +97,8 @@ void Fluids::reset_values()
 	simulation.frozen = false;
 	visualization.selected_colormap = Visualization::BlackWhite;
 
-
+	visualization.clamp_min = 1;
+	visualization.clamp_max = 256;
 
 	GLUI_Master.sync_live_all(); 	// sync live variables
 
@@ -159,6 +164,15 @@ void Fluids::build_gui()
 	glui->add_radiobutton_to_group(color_radio, "Red/White");
 	glui->add_radiobutton_to_group(color_radio, "Fire");
 
+	GLUI_Panel *clamp_panel = glui->add_panel("Clamping");	
+	clampmin_spinner = glui->add_spinner_to_panel(clamp_panel, "min", GLUI_SPINNER_FLOAT , &visualization.clamp_min, CLAMPMIN, glui_callback );	
+	clampmin_spinner->set_speed(1); 
+	clampmin_spinner->set_float_limits(1,256);
+	clampmin_spinner->set_float_val(visualization.clamp_min);
+	clampmax_spinner = glui->add_spinner_to_panel(clamp_panel, "max", GLUI_SPINNER_FLOAT , &visualization.clamp_max, CLAMPMAX, glui_callback );	
+	clampmax_spinner->set_speed(1); 
+	clampmax_spinner->set_float_limits(1,256);
+	clampmax_spinner->set_float_val(visualization.clamp_max);
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
