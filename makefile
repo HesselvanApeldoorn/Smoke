@@ -38,6 +38,7 @@ ifeq "$(UNAME)" "Darwin"
 endif
 
 all: $(EXECFILE)
+		./$(EXECFILE)
 
 $(EXECFILE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(CFLAGS) $(LDFLAGS) $(LIBDIRS) 
