@@ -62,7 +62,7 @@ Fluids::Fluids(int argc, char **argv)
 	GLUI_Master.set_glutIdleFunc(update);
 
 
-	simulation.init_simulation(Simulation::DIM);	//initialize the simulation data structures
+	simulation.init_simulation();	//initialize the simulation data structures
 
 	Fluids::build_gui();
 

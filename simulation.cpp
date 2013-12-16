@@ -12,13 +12,15 @@ void Simulation::init_parameters()
 	dt = 0.5;				//simulation time step
 	visc = 0.001;
 	frozen = 0;
+	init_simulation();
 }
 //init_simulation: Initialize simulation data structures as a function of the grid size 'n'.
 //                 Although the simulation takes place on a 2D grid, we allocate all data structures as 1D arrays,
 //                 for compatibility with the FFTW numerical library.
-void Simulation::init_simulation(int n)
+void Simulation::init_simulation()
 {
-	int i; size_t dim;
+	int i, n = Simulation::DIM; 
+	size_t dim;
 
 	dim     = n * 2*(n/2+1)*sizeof(fftw_real);        //Allocate data structures
 	vx       = (fftw_real*) malloc(dim);
