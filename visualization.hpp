@@ -21,6 +21,13 @@ friend class Fluids;
 
 public:
 
+	enum Dataset // Different types of datasets
+	{
+		Density,
+		Velocity,
+		Force
+	};
+
 	enum ColorMap // Different types of colouring methods
 	{
 		BlackWhite,
@@ -29,7 +36,7 @@ public:
 		Fire
 	};
 
-	enum Option
+	enum Option //Different types of options
 	{
 		DrawColor, 		//use direction color-coding or not
 		DrawSmoke, 		//draw the smoke or not
@@ -56,6 +63,7 @@ public:
 	void toggle_scalarcol();
 
 	float vec_scale;			//scaling of hedgehogs
+	int selected_dataset;
 	int number_of_colors;
 	int selected_colormap;
 	float clamp_min;

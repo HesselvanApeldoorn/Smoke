@@ -145,6 +145,12 @@ void Fluids::build_gui()
 	viscosity_spinner->set_float_limits(0.001,100);
 	viscosity_spinner->set_float_val(simulation.visc);
 
+	GLUI_Panel *dataset_panel = glui->add_panel("Dataset");	
+	GLUI_RadioGroup *dataset_radio = glui->add_radiogroup_to_panel(dataset_panel, &visualization.selected_dataset);
+	glui->add_radiobutton_to_group(dataset_radio, "Density (Rho)");
+	glui->add_radiobutton_to_group(dataset_radio, "Velocity (vx,vy)");
+	glui->add_radiobutton_to_group(dataset_radio, "Force (fx, fy)");
+
 	//number of colors spinner
 	nrcolor_spinner = glui->add_spinner("Number of colors",GLUI_SPINNER_INT , &visualization.number_of_colors, NUMBEROFCOLORS, glui_callback );
 	nrcolor_spinner->set_speed(1); 
@@ -152,7 +158,6 @@ void Fluids::build_gui()
 	nrcolor_spinner->set_int_val(visualization.number_of_colors);
 
 	GLUI_Panel *color_panel = glui->add_panel("Color map");	
-	// the radio buttons
 	GLUI_RadioGroup *color_radio = glui->add_radiogroup_to_panel(color_panel, &visualization.selected_colormap);
 	glui->add_radiobutton_to_group(color_radio, "Black/White");
 	glui->add_radiobutton_to_group(color_radio, "Rainbow");

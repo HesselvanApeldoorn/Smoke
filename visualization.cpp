@@ -17,6 +17,7 @@ void Visualization::init_parameters()
     options[DrawSmoke] = true;           //draw the smoke or not
     options[DrawVecs] = false;            //draw the vector field or not
     selected_colormap = Rainbow;
+    selected_dataset = Density;
     clamp_min = 1;
     clamp_max = 256;
 }
