@@ -37,18 +37,16 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 void Visualization::fire(float value,float* R,float* G,float* B)
 {
   if (value<0) value=0; if (value>1) value=1;
-  // *B = min(0.7, value);
-  // *G = min()
   if(value>=0.7) {
-    *R = 0.8;
-    *G = 0.8;
-    *B = 0.8;
+    *R = 1.0;
+    *G = 1.0;
+    *B = 1.0;
   } else if(value>=0.5){
-    *R = 0.8;
-    *G = 0.8;
+    *R = 1.0;
+    *G = 1.0;
     *B = (value-0.6)*5; //fluent transition white to yellow
   } else if(value>=0.3) {
-    *R = 0.8;
+    *R = 1.0;
     *G = (value-0.3)*5; //fluent transition yellow to red
     *B = 0;
   } else {
@@ -174,6 +172,10 @@ void Visualization::display_legend(int winWidth, int winHeight, float min_value,
         case RedWhite: {
             float rgbValues[2][3] = {{1,1,1}, {1,0,0}};
             draw_gradient(1,winWidth, winHeight, rgbValues, min_value, max_value);
+        } break;
+        case Fire: {
+            float rgbValues[4][3] = {{0,0,0}, {1,0,0}, {1,1,0}, {1,1,1}};
+            draw_gradient(3,winWidth, winHeight, rgbValues, min_value, max_value);
         } break;
     }
 }
