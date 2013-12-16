@@ -37,6 +37,8 @@ public:
 	};
 
 	Visualization();
+	void init_parameters();
+
 	void set_colormap(float vy);
 	void visualize(Simulation const &simulation, int winWidth, int winHeight);
 	void rainbow(float value,float* R,float* G,float* B);

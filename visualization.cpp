@@ -5,6 +5,11 @@
 
 Visualization::Visualization()
 {
+    init_parameters();
+}
+
+void Visualization::init_parameters()
+{
     options[DrawColor] = false; // don't draw color
     // color_dir = 0;            //use direction color-coding or not
     vec_scale = 1000;           //scaling of hedgehogs
@@ -15,7 +20,6 @@ Visualization::Visualization()
     clamp_min = 1;
     clamp_max = 256;
 }
-
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
 {

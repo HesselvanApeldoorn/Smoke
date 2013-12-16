@@ -15,7 +15,9 @@ friend class Visualization;
 
 public:
 	Simulation();
+	void init_parameters();
 	void init_simulation(int n);
+
 	void do_one_simulation_step(void);
 	void change_timestep(float step);
 	void change_viscosity(double viscosity);

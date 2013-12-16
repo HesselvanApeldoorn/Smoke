@@ -88,17 +88,8 @@ void Fluids::usage()
 
 void Fluids::reset_values()
 {
-	simulation.dt = 0.4;
-	visualization.disable(Visualization::DrawColor);
-	visualization.disable(Visualization::DrawSmoke);
-	visualization.enable(Visualization::DrawVecs);
-	visualization.vec_scale = 1000;
-	simulation.visc = 0.001;
-	simulation.frozen = false;
-	visualization.selected_colormap = Visualization::BlackWhite;
-
-	visualization.clamp_min = 1;
-	visualization.clamp_max = 256;
+	simulation.init_parameters();
+	visualization.init_parameters();
 
 	GLUI_Master.sync_live_all(); 	// sync live variables
 
