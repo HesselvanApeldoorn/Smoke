@@ -217,7 +217,25 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             idx = (j * DIM) + i;
-            glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
+            switch (selected_dataset) 
+            {
+                case Density: 
+                {
+                    glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
+                }
+                break;
+                case Velocity:
+                {
+                    float f = atan2(simulation.vy[idx], simulation.vx[idx]) / M_PI + 1;
+                    glColor3f(f,f,f);
+                }
+                break;
+                case Force: 
+                {
+                    glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
+                }
+                break;
+            }
             glVertex2f(px,py);
 
             for (i = 0; i < DIM - 1; i++)
