@@ -36,20 +36,22 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 void Visualization::fire(float value,float* R,float* G,float* B)
 {
   if (value<0) value=0; if (value>1) value=1;
+  // *B = min(0.7, value);
+  // *G = min()
   if(value>=0.7) {
     *R = 0.8;
     *G = 0.8;
     *B = 0.8;
-  } else if(value>=0.6){
+  } else if(value>=0.5){
     *R = 0.8;
     *G = 0.8;
-    *B = 0;
+    *B = (value-0.6)*5;
   } else if(value>=0.3) {
     *R = 0.8;
-    *G = 0;
+    *G = (value-0.3)*5;
     *B = 0;
   } else {
-    *R = 0.0;
+    *R = (value)*(3+1.0/3.0);
     *G = 0.0;
     *B = 0.0;
   }
