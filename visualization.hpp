@@ -21,7 +21,7 @@ friend class Fluids;
 
 public:
 
-	enum ColorMap
+	enum ColorMap // Different types of colouring methods
 	{
 		BlackWhite,
 		Rainbow,
@@ -68,11 +68,6 @@ private:
 	void display_legend(int winWidth, int winHeight, float min_value, float max_value);
 	void draw_string(string text, int x, int y);
 
-	//int scalar_col;           //method for scalar coloring
-	static const int COLOR_BLACKWHITE=0;   //different types of color mapping: black-and-white, rainbow, banded
-	static const int COLOR_RAINBOW=1;
-	static const int COLOR_BANDS=2;
-	static const int COLOR_REDWHITE=3;
 	int options[OptionSize];
 
 	//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
