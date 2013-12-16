@@ -123,6 +123,7 @@ void Fluids::build_gui()
 	glui->add_checkbox_to_panel(options_panel, "Draw Color", &visualization.options[Visualization::DrawColor] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Smoke", &visualization.options[Visualization::DrawSmoke] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
+	glui->add_checkbox_to_panel(options_panel, "Scaling", &visualization.options[Visualization::Scaling] );
 	glui->add_checkbox_to_panel(options_panel, "Freeze", &simulation.frozen );
 	options_panel->set_w(Fluids::GUI_WIDTH);
 

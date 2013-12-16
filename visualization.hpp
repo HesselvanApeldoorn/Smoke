@@ -33,7 +33,8 @@ public:
 		DrawColor, 		//use direction color-coding or not
 		DrawSmoke, 		//draw the smoke or not
 		DrawVecs,       //draw the vector field or not
-		OptionSize
+		Scaling,		//Apply scaling or not
+		OptionSize		//auto assigned (last in enum==size of enum)
 	};
 
 	Visualization();
