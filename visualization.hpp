@@ -5,6 +5,7 @@
 #include <cmath>
 #include <GL/glut.h>
 #include <rfftw.h>              //the numerical simulation FFTW library
+#include <sstream>     // for ostringstream
 #include <string>
 
 #include "simulation.hpp"
@@ -44,7 +45,7 @@ public:
 	void visualize(Simulation const &simulation, int winWidth, int winHeight);
 	void rainbow(float value,float* R,float* G,float* B);
 	void fire(float value,float* R,float* G,float* B);
-	void direction_to_color(float x, float y, int method);
+	void direction_to_color(float x, float y);
 	void toggle(Option option);
 	bool is_enabled(Option option);
 	void enable(Option option);
@@ -63,8 +64,8 @@ public:
 
 
 private:
-	void draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3]);
-	void display_legend(int winWidth, int winHeight);
+	void draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3], float min_value, float max_value);
+	void display_legend(int winWidth, int winHeight, float min_value, float max_value);
 	void draw_string(string text, int x, int y);
 
 	//int scalar_col;           //method for scalar coloring

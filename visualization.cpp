@@ -89,18 +89,18 @@ void Visualization::set_colormap(float vy)
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
 //                    using a rainbow colormap. If method==0, simply use the white color
-void Visualization::direction_to_color(float x, float y, int method)
+void Visualization::direction_to_color(float x, float y)
 {
     float r,g,b,f;
-    if (method)
+    if (options[DrawColor])
     {
         f = atan2(y,x) / M_PI + 1;
         r = f;
         if(r > 1) r = 2 - r;
-        g = f + (2/3);
+        g = f + (2.0/3.0);
         if(g > 2) g -= 2;
         if(g > 1) g = 2 - g;
-        b = f + 2 * (2/3);
+        b = f + 2 * (2.0/3.0);
         if(b > 2) b -= 2;
         if(b > 1) b = 2 - b;
     }
@@ -117,7 +117,7 @@ void Visualization::draw_string(string text, int x, int y)
     }
 }
 
-void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3])
+void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3], float min_value, float max_value)
 {
     int barHeight = 20;
     int bottomSpace = 10;
@@ -145,28 +145,32 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
 
     // Draw numbers
     glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
-    draw_string("0", winWidth/4,barHeight+bottomSpace+5);
-    draw_string("1", 3*winWidth/4,barHeight+bottomSpace+5);
+    ostringstream string_min;
+    string_min << min_value;
+    draw_string(string_min.str(), winWidth/4,barHeight+bottomSpace+5);
+    ostringstream string_max;
+    string_max << max_value;
+    draw_string(string_max.str(), 3*winWidth/4,barHeight+bottomSpace+5);
     
 
 }
 // Display color legend for current colormap
-void Visualization::display_legend(int winWidth, int winHeight)
+void Visualization::display_legend(int winWidth, int winHeight, float min_value, float max_value)
 {
 
     switch(selected_colormap)
     {
         case BlackWhite: {
             float rgbValues[2][3] = {{0,0,0}, {1,1,1}};
-            draw_gradient(1,winWidth, winHeight, rgbValues);
+            draw_gradient(1,winWidth, winHeight, rgbValues, min_value, max_value);
         } break;
         case Rainbow: {
             float rgbValues[3][3] = {{0,0,1}, {0,1,0},{1,0,0}};
-            draw_gradient(2,winWidth, winHeight, rgbValues);
+            draw_gradient(2,winWidth, winHeight, rgbValues, min_value, max_value);
         } break;
         case RedWhite: {
             float rgbValues[2][3] = {{1,1,1}, {1,0,0}};
-            draw_gradient(1,winWidth, winHeight, rgbValues);
+            draw_gradient(1,winWidth, winHeight, rgbValues, min_value, max_value);
         } break;
     }
 }
@@ -241,7 +245,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
         for (j = 0; j < DIM; j++)
         {
           idx = (j * DIM) + i;
-          direction_to_color(simulation.vx[idx],simulation.vy[idx],options[DrawColor]);
+          direction_to_color(simulation.vx[idx],simulation.vy[idx]);
           glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
           glVertex2f((wn + (fftw_real)i * wn) + vec_scale * simulation.vx[idx], (hn + (fftw_real)j * hn) + vec_scale * simulation.vy[idx]);
         }
@@ -251,7 +255,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     // Draw color legend
     if(options[DrawSmoke]) 
     {
-        display_legend(winWidth, winHeight);
+        display_legend(winWidth, winHeight, min_value, max_value);
     }
 }
 
