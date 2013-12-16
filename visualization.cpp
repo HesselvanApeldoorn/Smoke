@@ -45,13 +45,13 @@ void Visualization::fire(float value,float* R,float* G,float* B)
   } else if(value>=0.5){
     *R = 0.8;
     *G = 0.8;
-    *B = (value-0.6)*5;
+    *B = (value-0.6)*5; //fluent transition white to yellow
   } else if(value>=0.3) {
     *R = 0.8;
-    *G = (value-0.3)*5;
+    *G = (value-0.3)*5; //fluent transition yellow to red
     *B = 0;
   } else {
-    *R = (value)*(3+1.0/3.0);
+    *R = (value)*(3+1.0/3.0); //fluent transition red to black
     *G = 0.0;
     *B = 0.0;
   }
