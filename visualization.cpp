@@ -1,5 +1,4 @@
 #include "visualization.hpp"
-#include <iostream>
 
 //------ VISUALIZATION CODE STARTS HERE -----------------------------------------------------------------
 
@@ -57,30 +56,54 @@ void Visualization::fire(float value,float* R,float* G,float* B)
 }
 
 //set_colormap: Sets three different types of colormaps
-void Visualization::set_colormap(float vy)
+void Visualization::set_colormap(Simulation const &simulation, int idx, float min_value, float max_value)
 {
     // if(vy!=0 && vy <0) cout << vy <<"\n";
-    float R,G,B;
+    float value, R,G,B;
+
+    switch (selected_dataset) 
+    {
+        case Density: 
+        {
+            value = simulation.rho[idx];
+        }
+        break;
+        case Velocity:
+        {
+            value = sqrt(simulation.vx[idx]*simulation.vx[idx] + simulation.vy[idx]*simulation.vy[idx])*10;
+        }
+        break;
+        case Force: 
+        {
+            value = sqrt(simulation.fx[idx]*simulation.fx[idx] + simulation.fy[idx]*simulation.fy[idx])*10;
+        }
+        break;
+        default: 
+        {
+            value = simulation.rho[idx];
+        }
+    }
+
+    value = (value-min_value)/(max_value-min_value); //clamping
+
     switch(selected_colormap)
     {
-        case BlackWhite: {R = G = B = vy;} break;
-        case Rainbow: {rainbow(vy,&R,&G,&B);} break;
-        case RedWhite: {R=1;G=1-vy; B=1-vy;} break;
-        case Fire: {fire(vy,&R,&G,&B);} break;
+        case BlackWhite: {R = G = B = value;} break;
+        case Rainbow: {rainbow(value,&R,&G,&B);} break;
+        case RedWhite: {R=1;G=1-value; B=1-value;} break;
+        case Fire: {fire(value,&R,&G,&B);} break;
     }
+
+    //Number of colours
     R = round(R*(number_of_colors-1))/(number_of_colors-1);
     G = round(G*(number_of_colors-1))/(number_of_colors-1);
     B = round(B*(number_of_colors-1))/(number_of_colors-1);
 
     //clamping
-    //max
-    R = min(R,clamp_max/256.0f);
-    G = min(G,clamp_max/256.0f);
-    B = min(B,clamp_max/256.0f);
-    //min
-    R = max(R,clamp_min/256.0f);
-    G = max(G,clamp_min/256.0f);
-    B = max(B,clamp_min/256.0f);
+    R = clamp(R, clamp_min/256.0f, clamp_max/256.0f);
+    G = clamp(G, clamp_min/256.0f, clamp_max/256.0f);
+    B = clamp(B, clamp_min/256.0f, clamp_max/256.0f);
+   
 
 
     glColor3f(R,G,B);
@@ -217,25 +240,8 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             idx = (j * DIM) + i;
-            switch (selected_dataset) 
-            {
-                case Density: 
-                {
-                    glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
-                }
-                break;
-                case Velocity:
-                {
-                    float f = atan2(simulation.vy[idx], simulation.vx[idx]) / M_PI + 1;
-                    glColor3f(f,f,f);
-                }
-                break;
-                case Force: 
-                {
-                    glColor3f(simulation.rho[idx],simulation.rho[idx],simulation.rho[idx]);
-                }
-                break;
-            }
+            
+            set_colormap(simulation, idx, min_value, max_value);
             glVertex2f(px,py);
 
             for (i = 0; i < DIM - 1; i++)
@@ -243,19 +249,19 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
-                set_colormap((simulation.rho[idx]-min_value)/(max_value-min_value));
+                set_colormap(simulation, idx, min_value, max_value);
                 glVertex2f(px, py);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
-                set_colormap((simulation.rho[idx]-min_value)/(max_value-min_value));
+                set_colormap(simulation, idx, min_value, max_value);
                 glVertex2f(px, py);
             }
 
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
-            set_colormap((simulation.rho[idx]-min_value)/(max_value-min_value));
+            set_colormap(simulation, idx, min_value, max_value);
             glVertex2f(px, py);
             glEnd();
         }

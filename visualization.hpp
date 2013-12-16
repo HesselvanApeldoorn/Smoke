@@ -48,7 +48,7 @@ public:
 	Visualization();
 	void init_parameters();
 
-	void set_colormap(float vy);
+	void set_colormap(Simulation const &simulation, int idx, float min_value, float max_value);
 	void visualize(Simulation const &simulation, int winWidth, int winHeight);
 	void rainbow(float value,float* R,float* G,float* B);
 	void fire(float value,float* R,float* G,float* B);
