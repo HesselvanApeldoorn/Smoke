@@ -303,11 +303,10 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 idx = (j * DIM) + i;
 
                 float value_x, value_y;
-                switch(selected_scalar)
+                switch(selected_vector)
                 {
-                    case DensityScalar: { value_x=simulation.rho[idx]; value_y=simulation.rho[idx];} break;
-                    case VelocityScalar: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
-                    case ForceScalar: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
+                    case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
+                    case ForceVector: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
                 }
                 direction_to_color(value_x,value_y);
                 glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
