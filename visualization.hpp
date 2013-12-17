@@ -7,6 +7,7 @@
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <sstream>     // for ostringstream
 #include <string>
+#include <iostream>
 
 #include "simulation.hpp"
 #include "util.hpp"
@@ -38,7 +39,6 @@ public:
 
 	enum Option //Different types of options
 	{
-		DrawColor, 		//use direction color-coding or not
 		DrawSmoke, 		//draw the smoke or not
 		DrawVecs,       //draw the vector field or not
 		Scaling,		//Apply scaling or not

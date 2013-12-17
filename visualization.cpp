@@ -9,7 +9,6 @@ Visualization::Visualization()
 
 void Visualization::init_parameters()
 {
-    options[DrawColor] = false; // don't draw color
     // color_dir = 0;            //use direction color-coding or not
     vec_scale = 1000;           //scaling of hedgehogs
     number_of_colors = 256;     // number of colors used
@@ -35,7 +34,6 @@ void Visualization::rainbow(float value,float* R,float* G,float* B)
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::fire(float value,float* R,float* G,float* B)
 {
-  if (value<0) value=0; if (value>1) value=1;
   if(value>=0.7) {
     *R = 1.0;
     *G = 1.0;
@@ -116,20 +114,47 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
 void Visualization::direction_to_color(float x, float y)
 {
     float r,g,b,f;
-    if (options[DrawColor])
+    f = atan2(y,x) / M_PI + 1;
+    switch (selected_colormap)
     {
-        f = atan2(y,x) / M_PI + 1;
-        r = f;
-        if(r > 1) r = 2 - r;
-        g = f + (2.0/3.0);
-        if(g > 2) g -= 2;
-        if(g > 1) g = 2 - g;
-        b = f + 2 * (2.0/3.0);
-        if(b > 2) b -= 2;
-        if(b > 1) b = 2 - b;
+        case BlackWhite:{r = g = b = 1; } break;
+        case Rainbow:
+        {
+            r = f;
+            if(r > 1) r = 2 - r;
+            g = f + (2.0/3.0);
+            if(g > 2) g -= 2;
+            if(g > 1) g = 2 - g;
+            b = f + 2 * (2.0/3.0);
+            if(b > 2) b -= 2;
+            if(b > 1) b = 2 - b;
+        } break;
+        case RedWhite:
+        {
+            r=1;
+            g=b=f;
+        } break;
+        case Fire:
+        {
+            if(f>=0.7) {
+                r = 1.0;
+                g = 1.0;
+                b = 1.0;
+            } else if(f>=0.5){
+                r = 1.0;
+                g = 1.0;
+                b = (f-0.6)*5; //fluent transition white to yellow
+            } else if(f>=0.3) {
+                r = 1.0;
+                g = (f-0.3)*5; //fluent transition yellow to red
+                b = 0;
+            } else {
+                r = (f)*(3+1.0/3.0); //fluent transition red to black
+                g = 0.0;
+                b = 0.0;
+            }
+        }
     }
-    else
-    { r = g = b = 1; }
     glColor3f(r,g,b);
 }
 

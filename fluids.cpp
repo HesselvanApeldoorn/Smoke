@@ -76,7 +76,6 @@ void Fluids::usage()
 	cout << "Click and drag the mouse to steer the flow!\n";
 	cout << "T/t:   increase/decrease simulation timestep\n";
 	cout << "S/s:   increase/decrease hedgehog scaling\n";
-	cout << "c:     toggle direction coloring on/off\n";
 	cout << "V/v:   increase decrease fluid viscosity\n";
 	cout << "x:     toggle drawing matter on/off\n";
 	cout << "y:     toggle drawing hedgehogs on/off\n";
@@ -120,7 +119,6 @@ void Fluids::build_gui()
 
 
 	GLUI_Panel *options_panel = glui->add_panel("Options");	
-	glui->add_checkbox_to_panel(options_panel, "Draw Color", &visualization.options[Visualization::DrawColor] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Smoke", &visualization.options[Visualization::DrawSmoke] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
 	glui->add_checkbox_to_panel(options_panel, "Scaling", &visualization.options[Visualization::Scaling] );
@@ -185,7 +183,6 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 	{
 	  case 't': simulation.change_timestep(-0.001); break;
 	  case 'T': simulation.change_timestep(+0.001); break;
-	  case 'c': visualization.toggle(Visualization::DrawColor); break;
 	  case 'S': visualization.change_hedgehog(1.2); break;
 	  case 's': visualization.change_hedgehog(0.8); break;
 	  case 'V': simulation.change_viscosity(5); break;
