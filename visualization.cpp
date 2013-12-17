@@ -144,7 +144,7 @@ void Visualization::direction_to_color(float x, float y)
             } else if(f>=0.5){
                 r = 1.0;
                 g = 1.0;
-                b = (f-0.6)*5; //fluent transition white to yellow
+                b = (f-0.5)*5; //fluent transition white to yellow
             } else if(f>=0.3) {
                 r = 1.0;
                 g = (f-0.3)*5; //fluent transition yellow to red
