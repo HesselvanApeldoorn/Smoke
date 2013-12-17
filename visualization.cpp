@@ -15,7 +15,8 @@ void Visualization::init_parameters()
     options[DrawSmoke] = true;           //draw the smoke or not
     options[DrawVecs] = false;            //draw the vector field or not
     selected_colormap = Rainbow;
-    selected_dataset = Density;
+    selected_scalar = VelocityScalar;
+    selected_vector = VelocityVector;
     clamp_min = 1;
     clamp_max = 256;
 }
@@ -59,19 +60,19 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
     // if(vy!=0 && vy <0) cout << vy <<"\n";
     float value, R,G,B;
 
-    switch (selected_dataset) 
+    switch (selected_scalar) 
     {
-        case Density: 
+        case DensityScalar: 
         {
             value = simulation.rho[idx];
         }
         break;
-        case Velocity:
+        case VelocityScalar:
         {
             value = sqrt(simulation.vx[idx]*simulation.vx[idx] + simulation.vy[idx]*simulation.vy[idx])*10;
         }
         break;
-        case Force: 
+        case ForceScalar: 
         {
             value = sqrt(simulation.fx[idx]*simulation.fx[idx] + simulation.fy[idx]*simulation.fy[idx])*10;
         }
@@ -294,16 +295,26 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
     if (options[DrawVecs])
     {
-      glBegin(GL_LINES);                //draw velocities
-      for (i = 0; i < DIM; i++)
-        for (j = 0; j < DIM; j++)
+        glBegin(GL_LINES);                //draw vectors
+        for (i = 0; i < DIM; i++)
         {
-          idx = (j * DIM) + i;
-          direction_to_color(simulation.vx[idx],simulation.vy[idx]);
-          glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-          glVertex2f((wn + (fftw_real)i * wn) + vec_scale * simulation.vx[idx], (hn + (fftw_real)j * hn) + vec_scale * simulation.vy[idx]);
+            for (j = 0; j < DIM; j++)
+            {
+                idx = (j * DIM) + i;
+
+                float value_x, value_y;
+                switch(selected_scalar)
+                {
+                    case DensityScalar: { value_x=simulation.rho[idx]; value_y=simulation.rho[idx];} break;
+                    case VelocityScalar: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
+                    case ForceScalar: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
+                }
+                direction_to_color(value_x,value_y);
+                glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
+                glVertex2f((wn + (fftw_real)i * wn) + vec_scale * value_x, (hn + (fftw_real)j * hn) + vec_scale * value_y);
+            }
         }
-      glEnd();
+        glEnd();
     }
 
     // Draw color legend

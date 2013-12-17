@@ -143,12 +143,6 @@ void Fluids::build_gui()
 	viscosity_spinner->set_float_limits(0.001,100);
 	viscosity_spinner->set_float_val(simulation.visc);
 
-	GLUI_Panel *dataset_panel = glui->add_panel("Dataset");	
-	GLUI_RadioGroup *dataset_radio = glui->add_radiogroup_to_panel(dataset_panel, &visualization.selected_dataset);
-	glui->add_radiobutton_to_group(dataset_radio, "Density (Rho)");
-	glui->add_radiobutton_to_group(dataset_radio, "Velocity (vx,vy)");
-	glui->add_radiobutton_to_group(dataset_radio, "Force (fx, fy)");
-
 	//number of colors spinner
 	nrcolor_spinner = glui->add_spinner("Number of colors",GLUI_SPINNER_INT , &visualization.number_of_colors, NUMBEROFCOLORS, glui_callback );
 	nrcolor_spinner->set_speed(1); 
@@ -171,6 +165,17 @@ void Fluids::build_gui()
 	clampmax_spinner->set_speed(1); 
 	clampmax_spinner->set_float_limits(visualization.clamp_min,visualization.clamp_max);
 	clampmax_spinner->set_float_val(visualization.clamp_max);
+
+	GLUI_Panel *scalar_panel = glui->add_panel("Scalar field");	
+	GLUI_RadioGroup *scalar_radio = glui->add_radiogroup_to_panel(scalar_panel, &visualization.selected_scalar);
+	glui->add_radiobutton_to_group(scalar_radio, "Density (Rho)");
+	glui->add_radiobutton_to_group(scalar_radio, "Velocity (vx,vy)");
+	glui->add_radiobutton_to_group(scalar_radio, "Force (fx, fy)");
+
+	GLUI_Panel *vector_panel = glui->add_panel("Vector field");	
+	GLUI_RadioGroup *vector_radio = glui->add_radiogroup_to_panel(vector_panel, &visualization.selected_vector);
+	glui->add_radiobutton_to_group(vector_radio, "Velocity (vx,vy)");
+	glui->add_radiobutton_to_group(vector_radio, "Force (fx, fy)");
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button

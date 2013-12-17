@@ -22,11 +22,12 @@ friend class Fluids;
 
 public:
 
-	enum Dataset // Different types of datasets
+	enum Option //Different types of options
 	{
-		Density,
-		Velocity,
-		Force
+		DrawSmoke, 		//draw the smoke or not
+		DrawVecs,       //draw the vector field or not
+		Scaling,		//Apply scaling or not
+		OptionSize		//auto assigned (last in enum==size of enum)
 	};
 
 	enum ColorMap // Different types of colouring methods
@@ -37,12 +38,17 @@ public:
 		Fire
 	};
 
-	enum Option //Different types of options
+	enum ScalarField // Different types of scalar fields
 	{
-		DrawSmoke, 		//draw the smoke or not
-		DrawVecs,       //draw the vector field or not
-		Scaling,		//Apply scaling or not
-		OptionSize		//auto assigned (last in enum==size of enum)
+		DensityScalar,
+		VelocityScalar,
+		ForceScalar
+	};
+
+	enum VectorField // Different types of vector fields
+	{
+		VelocityVector,
+		ForceVector
 	};
 
 	Visualization();
@@ -63,7 +69,10 @@ public:
 	void toggle_scalarcol();
 
 	float vec_scale;			//scaling of hedgehogs
-	int selected_dataset;
+
+	int selected_scalar;
+	int selected_vector;
+
 	int number_of_colors;
 	int selected_colormap;
 	float clamp_min;
