@@ -78,6 +78,9 @@ public:
 	float clamp_min;
 	float clamp_max;
 
+	int number_of_glyphs_x;
+	int number_of_glyphs_y;
+
 
 
 private:

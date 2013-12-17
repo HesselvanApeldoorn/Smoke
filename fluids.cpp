@@ -14,6 +14,8 @@ using namespace std;
 #define NUMBEROFCOLORS 4 // For viscosity spinner in glui
 #define CLAMPMIN 5 // For clamp min spinner in glui
 #define CLAMPMAX 6 // For clamp min spinner in glui
+#define NRGLYPHSX 7 // For number of glyphs x spinner in glui
+#define NRGLYPHSY 8 // For number of glyphs y spinner in glui
 
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
@@ -32,6 +34,8 @@ GLUI_Spinner *viscosity_spinner;
 GLUI_Spinner *nrcolor_spinner;
 GLUI_Spinner *clampmin_spinner;
 GLUI_Spinner *clampmax_spinner;
+GLUI_Spinner *glyph_x_spinner;
+GLUI_Spinner *glyph_y_spinner;
 
 void Fluids::update()
 {
@@ -176,6 +180,17 @@ void Fluids::build_gui()
 	GLUI_RadioGroup *vector_radio = glui->add_radiogroup_to_panel(vector_panel, &visualization.selected_vector);
 	glui->add_radiobutton_to_group(vector_radio, "Velocity (vx,vy)");
 	glui->add_radiobutton_to_group(vector_radio, "Force (fx, fy)");
+
+	GLUI_Panel *glyphs_panel = glui->add_panel("Number of glyphs");	
+	glyph_x_spinner = glui->add_spinner_to_panel(glyphs_panel, "X", GLUI_SPINNER_INT , &visualization.number_of_glyphs_x, NRGLYPHSX, glui_callback );	
+	glyph_x_spinner->set_speed(1); 
+	glyph_x_spinner->set_int_limits(0,120);
+	glyph_x_spinner->set_int_val(visualization.number_of_glyphs_x);
+	glyph_y_spinner = glui->add_spinner_to_panel(glyphs_panel, "Y", GLUI_SPINNER_INT , &visualization.number_of_glyphs_y, NRGLYPHSY, glui_callback );	
+	glyph_y_spinner->set_speed(1); 
+	glyph_y_spinner->set_int_limits(0,120);
+	glyph_y_spinner->set_int_val(visualization.number_of_glyphs_y);
+
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
