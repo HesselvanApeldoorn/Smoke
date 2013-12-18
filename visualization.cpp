@@ -19,14 +19,16 @@ void Visualization::init_parameters()
     selected_vector = VelocityVector;
     clamp_min = 1;
     clamp_max = 256;
+    number_of_glyphs_x = 120;
+    number_of_glyphs_y = 120;
 }
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
 {
    const float dx=0.8;
-   if (value<0) value=0; if (value>1) value=1;
+   if (value<0) value=0; if (value>1) value=1;  // clamp value in [0,1]
 
-   value = (6-2*dx)*value+dx;
+   value = (6-2*dx)*value+dx; // scale value to [dx, 6-dx]
    *R = max(0.0f,(3-fabs(value-4)-fabs(value-5))/2);
    *G = max(0.0f,(4-fabs(value-2)-fabs(value-4))/2);
    *B = max(0.0f,(3-fabs(value-1)-fabs(value-2))/2);
@@ -83,7 +85,7 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
         }
     }
 
-    value = (value-min_value)/(max_value-min_value); //clamping
+    value = (value-min_value)/(max_value-min_value); //scaling
 
     switch(selected_colormap)
     {
@@ -296,21 +298,54 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     if (options[DrawVecs])
     {
         glBegin(GL_LINES);                //draw vectors
-        for (i = 0; i < DIM; i++)
+        for (i = 0; i < number_of_glyphs_x; i++)
         {
-            for (j = 0; j < DIM; j++)
+            for (j = 0; j < number_of_glyphs_y; j++)
             {
-                idx = (j * DIM) + i;
+                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
+                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
+                idx = (j * number_of_glyphs_y) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
 
-                float value_x, value_y;
+                fftw_real *dataset_x, *dataset_y;
+                switch(selected_scalar)
+                {
+                    case DensityScalar: 
+                    {
+                        dataset_x=simulation.rho; dataset_y=simulation.rho;
+                    } break;
+                    case VelocityScalar: 
+                    {
+                        dataset_x=simulation.vx; dataset_y=simulation.vy;
+                    } break;
+                    case ForceScalar: 
+                    {
+                        dataset_x=simulation.fx; dataset_y=simulation.fy;
+                    } break;
+                }
+                int idx_lower_left = floor(glyph_point_x)+DIM*floor(glyph_point_y);
+                int idx_lower_right = ceil(glyph_point_x)+DIM*floor(glyph_point_y);
+                int idx_upper_left = floor(glyph_point_x)+DIM*ceil(glyph_point_y);
+                int idx_upper_right = ceil(glyph_point_x)+DIM*ceil(glyph_point_y);
+                if (glyph_point_x ==59 && glyph_point_y == 59) {
+                cout << idx_lower_left << "\n krakra" << idx_upper_right << "\n";
+                }
+
+                float bottom_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_lower_right];
+                float bottom_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_lower_right];
+                float top_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_upper_right];
+                float top_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_upper_right];
+
+                float value_x = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_x+(glyph_point_y-floor(glyph_point_y))*top_value_x;
+                float value_y = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_y+(glyph_point_y-floor(glyph_point_y))*top_value_y;
+
+                direction_to_color(value_x,value_y);
                 switch(selected_vector)
                 {
                     case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
                     case ForceVector: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
                 }
-                direction_to_color(value_x,value_y);
-                glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-                glVertex2f((wn + (fftw_real)i * wn) + vec_scale * value_x, (hn + (fftw_real)j * hn) + vec_scale * value_y);
+                glVertex2f(wn + (fftw_real) glyph_point_x * wn, hn + (fftw_real) glyph_point_y * hn);
+                glVertex2f((wn + (fftw_real) glyph_point_x * wn) + vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + vec_scale * value_y);
             }
         }
         glEnd();
