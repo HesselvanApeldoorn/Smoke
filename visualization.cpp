@@ -327,7 +327,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 int idx_upper_left = floor(glyph_point_x)+DIM*ceil(glyph_point_y);
                 int idx_upper_right = ceil(glyph_point_x)+DIM*ceil(glyph_point_y);
                 if (glyph_point_x ==59 && glyph_point_y == 59) {
-                cout << idx_lower_left << "\n krakra" << idx_upper_right << "\n";
+                cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
                 }
 
                 float bottom_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_lower_right];
@@ -337,7 +337,9 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
                 float value_x = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_x+(glyph_point_y-floor(glyph_point_y))*top_value_x;
                 float value_y = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_y+(glyph_point_y-floor(glyph_point_y))*top_value_y;
-
+                if (glyph_point_x ==59 && glyph_point_y == 59) {
+                    cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
+                }
                 direction_to_color(value_x,value_y);
                 switch(selected_vector)
                 {
