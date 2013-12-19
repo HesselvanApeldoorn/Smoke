@@ -114,10 +114,10 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
 //                    using a rainbow colormap. If method==0, simply use the white color
-void Visualization::direction_to_color(float x, float y)
+void Visualization::direction_to_color(float f)
 {
-    float r,g,b,f;
-    f = atan2(y,x) / M_PI + 1;
+    float r,g,b;
+
     switch (selected_colormap)
     {
         case BlackWhite:{r = g = b = 1; } break;
@@ -302,10 +302,14 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
         {
             for (j = 0; j < number_of_glyphs_y; j++)
             {
-                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
-                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
                 idx = (j * number_of_glyphs_y) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
 
+                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x) + 0.00001;
+                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y) + 0.00001;
+                
+                // if(glyph_point_x%1==0)
+                // if(glyph_point_x%1==0)
+                
                 fftw_real *dataset_x, *dataset_y;
                 switch(selected_scalar)
                 {
@@ -326,7 +330,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 int idx_lower_right = ceil(glyph_point_x)+DIM*floor(glyph_point_y);
                 int idx_upper_left = floor(glyph_point_x)+DIM*ceil(glyph_point_y);
                 int idx_upper_right = ceil(glyph_point_x)+DIM*ceil(glyph_point_y);
-                if (glyph_point_x ==59 && glyph_point_y == 59) {
+                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
                 cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
                 }
 
@@ -334,13 +338,24 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 float bottom_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_lower_right];
                 float top_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_upper_right];
                 float top_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_upper_right];
-
+                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
+                    cout << bottom_value_x << "  values bottom x" << bottom_value_y << " values bottom y" <<  "\n"; // altijd 0 nu
+                    cout << top_value_x << "  values top x" << top_value_y << " values top y" <<  "\n"; // altijd 0 nu
+                }
                 float value_x = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_x+(glyph_point_y-floor(glyph_point_y))*top_value_x;
                 float value_y = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_y+(glyph_point_y-floor(glyph_point_y))*top_value_y;
-                if (glyph_point_x ==59 && glyph_point_y == 59) {
+                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
                     cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
                 }
-                direction_to_color(value_x,value_y);
+
+                float f;
+                if(selected_scalar==DensityScalar) {
+                    f = value_x;
+                } else {
+                    f = atan2(value_y,value_x) / M_PI + 1;
+
+                }
+                direction_to_color(f);
                 switch(selected_vector)
                 {
                     case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
