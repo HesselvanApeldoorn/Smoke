@@ -7,3 +7,8 @@ float clamp(float value, float min, float max)
 {
 	return value < min ? min : ( value > max ? max : value);
 }
+
+float rad2deg(float x)
+{
+	return x * (180/M_PI);
+}

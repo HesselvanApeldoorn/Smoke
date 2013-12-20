@@ -51,6 +51,12 @@ public:
 		ForceVector
 	};
 
+	enum GlyphType // Different types of glyphs
+	{
+		Hedgehog,
+		Cone
+	};
+
 	Visualization();
 	void init_parameters();
 
@@ -71,6 +77,7 @@ public:
 
 	int selected_scalar;
 	int selected_vector;
+	int selected_glyph;
 
 	int number_of_colors;
 	int selected_colormap;
@@ -89,6 +96,7 @@ private:
 
 	void draw_string(string text, int x, int y);
 	void draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value);
+	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y);
 
 	int options[OptionSize];
 
