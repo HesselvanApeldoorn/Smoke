@@ -19,8 +19,8 @@ void Visualization::init_parameters()
     selected_vector = VelocityVector;
     clamp_min = 0;
     clamp_max = 1;
-    number_of_glyphs_x = 120;
-    number_of_glyphs_y = 120;
+    number_of_glyphs_x = 12;
+    number_of_glyphs_y = 12;
 }
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
@@ -305,14 +305,15 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
         } break;
         case Cone:
         {
-            float angle = rad2deg(atan2(glyph_point_x, glyph_point_y));
-            float size = sqrt(glyph_point_x*glyph_point_x+glyph_point_y*glyph_point_y)*10;
+            float angle = rad2deg(atan2(value_x,value_y));
+            float size = sqrt(value_x*value_x+value_y*value_y)*10;
 
             glPushMatrix();
             glTranslatef(wn*glyph_point_x, hn*glyph_point_y, 0);
-            glRotatef(angle, 0.0, 0.0, 1.0);
-            glRotatef(270.0, 1.0, 0.0, 0.0);
-            glutSolidCone(5.0, size, 5, 5);
+            glRotatef(angle, 1.0, 1.0, 0.0);
+
+            glRotatef(90, 0.0, 0, 1.0);
+            glutSolidCone(5, 15, 12, 12);
             glPopMatrix();
         }
     }

@@ -181,7 +181,9 @@ void Fluids::build_gui()
 	glui->add_radiobutton_to_group(vector_radio, "Velocity (vx,vy)");
 	glui->add_radiobutton_to_group(vector_radio, "Force (fx, fy)");
 
-	GLUI_Panel *nr_glyph_panel = glui->add_panel("Number of glyphs");	
+	GLUI_Rollout *glyph_rollout = new GLUI_Rollout(glui, "Glyphs", true );
+
+	GLUI_Panel *nr_glyph_panel = new GLUI_Panel(glyph_rollout, "Number of glyphs");	
 	glyph_x_spinner = glui->add_spinner_to_panel(nr_glyph_panel, "X", GLUI_SPINNER_INT , &visualization.number_of_glyphs_x, NRGLYPHSX, glui_callback );	
 	glyph_x_spinner->set_speed(1); 
 	glyph_x_spinner->set_int_limits(0,120);
@@ -191,10 +193,11 @@ void Fluids::build_gui()
 	glyph_y_spinner->set_int_limits(0,120);
 	glyph_y_spinner->set_int_val(visualization.number_of_glyphs_y);
 
-	GLUI_Panel *type_glyph_panel = glui->add_panel("Glyph type");	
+	GLUI_Panel *type_glyph_panel = new GLUI_Panel(glyph_rollout, "Glyph type");	
 	GLUI_RadioGroup *glyph_radio = glui->add_radiogroup_to_panel(type_glyph_panel, &visualization.selected_glyph);
 	glui->add_radiobutton_to_group(glyph_radio, "Hedgehog");
 	glui->add_radiobutton_to_group(glyph_radio, "Cone");
+
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
