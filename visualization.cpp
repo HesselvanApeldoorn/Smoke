@@ -17,8 +17,8 @@ void Visualization::init_parameters()
     selected_colormap = Rainbow;
     selected_scalar = VelocityScalar;
     selected_vector = VelocityVector;
-    clamp_min = 1;
-    clamp_max = 256;
+    clamp_min = 0;
+    clamp_max = 1;
     number_of_glyphs_x = 120;
     number_of_glyphs_y = 120;
 }
@@ -62,6 +62,7 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
     // if(vy!=0 && vy <0) cout << vy <<"\n";
     float value, R,G,B;
 
+
     switch (selected_scalar) 
     {
         case DensityScalar: 
@@ -85,7 +86,13 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
         }
     }
 
-    value = (value-min_value)/(max_value-min_value); //scaling
+  
+    value = clamp(value, clamp_min, clamp_max); //clamping
+
+    
+    value = (value-clamp_min)/(clamp_max-clamp_min); // normalize clamp values 
+
+    if(options[Scaling]) value = (value-min_value)/(max_value-min_value); //scaling
 
     switch(selected_colormap)
     {
@@ -99,12 +106,6 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
     R = round(R*(number_of_colors-1))/(number_of_colors-1);
     G = round(G*(number_of_colors-1))/(number_of_colors-1);
     B = round(B*(number_of_colors-1))/(number_of_colors-1);
-
-    //clamping
-    R = clamp(R, clamp_min/256.0f, clamp_max/256.0f);
-    G = clamp(G, clamp_min/256.0f, clamp_max/256.0f);
-    B = clamp(B, clamp_min/256.0f, clamp_max/256.0f);
-   
 
 
     glColor3f(R,G,B);
@@ -135,7 +136,7 @@ void Visualization::direction_to_color(float f)
         case RedWhite:
         {
             r=1;
-            g=b=f;
+            g=b=(1-f);
         } break;
         case Fire:
         {
@@ -197,11 +198,26 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
 
     // Draw numbers
     glColor3f(1-rgbValues[0][0],1-rgbValues[0][1],1-rgbValues[0][2]);
+
+    float min,max;
+    if(max_value<clamp_max) {
+        max = max_value;
+    } else {
+        max = clamp_max;
+    }
+    if(min_value>clamp_min) {
+        min = min_value;
+    } else {
+        min = clamp_min;
+    }
+    if(max<min) {
+        max = min;  // min cannot exceed max, clamp_min might be bigger than the max value in the field
+    }
     ostringstream string_min;
-    string_min << min_value;
+    string_min << min;
     draw_string(string_min.str(), winWidth/4,barHeight+bottomSpace+5);
     ostringstream string_max;
-    string_max << max_value;
+    string_max << max;
     draw_string(string_max.str(), 3*winWidth/4,barHeight+bottomSpace+5);
     
 
@@ -239,7 +255,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
 
-    float max_value=1, min_value=0;
+    float max_value=10, min_value=0;
     if(options[Scaling])
     {
         max_value=0;
@@ -330,23 +346,23 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 int idx_lower_right = ceil(glyph_point_x)+DIM*floor(glyph_point_y);
                 int idx_upper_left = floor(glyph_point_x)+DIM*ceil(glyph_point_y);
                 int idx_upper_right = ceil(glyph_point_x)+DIM*ceil(glyph_point_y);
-                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
-                }
+                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
+                // cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
+                // }
 
                 float bottom_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_lower_right];
                 float bottom_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_lower_right];
                 float top_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_upper_right];
                 float top_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_upper_right];
-                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                    cout << bottom_value_x << "  values bottom x" << bottom_value_y << " values bottom y" <<  "\n"; // altijd 0 nu
-                    cout << top_value_x << "  values top x" << top_value_y << " values top y" <<  "\n"; // altijd 0 nu
-                }
+                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
+                //     cout << bottom_value_x << "  values bottom x" << bottom_value_y << " values bottom y" <<  "\n"; // altijd 0 nu
+                //     cout << top_value_x << "  values top x" << top_value_y << " values top y" <<  "\n"; // altijd 0 nu
+                // }
                 float value_x = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_x+(glyph_point_y-floor(glyph_point_y))*top_value_x;
                 float value_y = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_y+(glyph_point_y-floor(glyph_point_y))*top_value_y;
-                if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                    cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
-                }
+                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
+                //     cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
+                // }
 
                 float f;
                 if(selected_scalar==DensityScalar) {
