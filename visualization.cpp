@@ -295,6 +295,29 @@ void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_
 
 }
 
+void Visualization::draw_glyphs(fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y, )
+{
+    switch(selected_glyph) {
+        case Hedgehog: 
+        {
+            glVertex2f(wn + (fftw_real) glyph_point_x * wn, hn + (fftw_real) glyph_point_y * hn);
+            glVertex2f((wn + (fftw_real) glyph_point_x * wn) + vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + vec_scale * value_y);
+        } break;
+        case Cone:
+        {
+            float angle = rad2deg(atan2(glyph_point_x, glyph_point_y));
+            float size = sqrt(glyph_point_x*glyph_point_x+glyph_point_y*glyph_point_y)*vec_scale;
+
+            glPushMatrix();
+            glTranslatef(glyph_point_x, glyph_point_y, 10.0);
+            glRotatef(angle, 0.0, 0.0, 1.0);
+            glRotatef(270.0, 1.0, 0.0 0.0);
+            glutSolidCone(5.0, size, 5, 5);
+            glPopMatrix();
+        }
+    }
+}
+
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
@@ -412,8 +435,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                     case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
                     case ForceVector: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
                 }
-                glVertex2f(wn + (fftw_real) glyph_point_x * wn, hn + (fftw_real) glyph_point_y * hn);
-                glVertex2f((wn + (fftw_real) glyph_point_x * wn) + vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + vec_scale * value_y);
+                draw_glyphs(wn, hn, glyph_point_x, glyph_point_y);
             }
         }
         glEnd();
