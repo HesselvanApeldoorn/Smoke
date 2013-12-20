@@ -115,10 +115,15 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
 //                    using a rainbow colormap. If method==0, simply use the white color
-void Visualization::direction_to_color(float f)
+void Visualization::direction_to_color(float f, float min_value, float max_value)
 {
     float r,g,b;
+    f = clamp(f, clamp_min, clamp_max); //clamping
 
+    
+    f = (f-clamp_min)/(clamp_max-clamp_min); // normalize clamp values 
+
+    if(options[Scaling]) f = (f-min_value)/(max_value-min_value); //scaling
     switch (selected_colormap)
     {
         case BlackWhite:{r = g = b = 1; } break;
@@ -247,68 +252,98 @@ void Visualization::display_legend(int winWidth, int winHeight, float min_value,
     }
 }
 
+void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value)
+{
+    const int DIM = Simulation::DIM;
+    double px,py;
+    int i, j, idx;  
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    for (j = 0; j < DIM - 1; j++)           //draw smoke
+    {
+        glBegin(GL_TRIANGLE_STRIP);
+
+        i = 0;
+        px = wn + (fftw_real)i * wn;
+        py = hn + (fftw_real)j * hn;
+        idx = (j * DIM) + i;
+        
+        set_colormap(simulation, idx, min_value, max_value);
+        glVertex2f(px,py);
+
+        for (i = 0; i < DIM - 1; i++)
+        {
+            px = wn + (fftw_real)i * wn;
+            py = hn + (fftw_real)(j + 1) * hn;
+            idx = ((j + 1) * DIM) + i;
+            set_colormap(simulation, idx, min_value, max_value);
+            glVertex2f(px, py);
+            px = wn + (fftw_real)(i + 1) * wn;
+            py = hn + (fftw_real)j * hn;
+            idx = (j * DIM) + (i + 1);
+            set_colormap(simulation, idx, min_value, max_value);
+            glVertex2f(px, py);
+        }
+
+        px = wn + (fftw_real)(DIM - 1) * wn;
+        py = hn + (fftw_real)(j + 1) * hn;
+        idx = ((j + 1) * DIM) + (DIM - 1);
+        set_colormap(simulation, idx, min_value, max_value);
+        glVertex2f(px, py);
+        glEnd();
+    }
+
+}
+
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
-    int i, j, idx; double px,py;
+    int i, j, idx; 
     const int DIM = Simulation::DIM;
     fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
 
     float max_value=10, min_value=0;
+
     if(options[Scaling])
     {
         max_value=0;
         min_value=10;
+
         for(i=0; i<DIM*DIM-1; i++)
         {
-            if(simulation.rho[i]>max_value) //find maximum
+            float value;
+            switch(selected_scalar)
             {
-                max_value=simulation.rho[i];
+                case DensityScalar: 
+                {
+                    value = simulation.rho[i];
+                } break;
+                case VelocityScalar: 
+                {
+                    value = sqrt(simulation.vy[i]*simulation.vy[i]+simulation.vx[i]*simulation.vx[i])*10;
+
+                } break;
+                case ForceScalar: 
+                {
+                    value = sqrt(simulation.fy[i]*simulation.fy[i]+simulation.fx[i]*simulation.fx[i])*10;
+                } break;
             }
-            if(simulation.rho[i]<min_value) //find minimum
+
+            if(value>max_value) //find maximum
             {
-                min_value=simulation.rho[i];
+                max_value=value;
+            }
+            if(value<min_value) //find minimum
+            {
+                min_value=value;
             }
         }
     }
 
     if (options[DrawSmoke])
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        for (j = 0; j < DIM - 1; j++)           //draw smoke
-        {
-            glBegin(GL_TRIANGLE_STRIP);
-
-            i = 0;
-            px = wn + (fftw_real)i * wn;
-            py = hn + (fftw_real)j * hn;
-            idx = (j * DIM) + i;
-            
-            set_colormap(simulation, idx, min_value, max_value);
-            glVertex2f(px,py);
-
-            for (i = 0; i < DIM - 1; i++)
-            {
-                px = wn + (fftw_real)i * wn;
-                py = hn + (fftw_real)(j + 1) * hn;
-                idx = ((j + 1) * DIM) + i;
-                set_colormap(simulation, idx, min_value, max_value);
-                glVertex2f(px, py);
-                px = wn + (fftw_real)(i + 1) * wn;
-                py = hn + (fftw_real)j * hn;
-                idx = (j * DIM) + (i + 1);
-                set_colormap(simulation, idx, min_value, max_value);
-                glVertex2f(px, py);
-            }
-
-            px = wn + (fftw_real)(DIM - 1) * wn;
-            py = hn + (fftw_real)(j + 1) * hn;
-            idx = ((j + 1) * DIM) + (DIM - 1);
-            set_colormap(simulation, idx, min_value, max_value);
-            glVertex2f(px, py);
-            glEnd();
-        }
+        draw_smoke(simulation,wn,hn, min_value, max_value);
     }
 
     if (options[DrawVecs])
@@ -371,7 +406,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                     f = atan2(value_y,value_x) / M_PI + 1;
 
                 }
-                direction_to_color(f);
+                direction_to_color(f, min_value, max_value);
                 switch(selected_vector)
                 {
                     case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
@@ -384,11 +419,8 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
         glEnd();
     }
 
-    // Draw color legend
-    if(options[DrawSmoke]) 
-    {
-        display_legend(winWidth, winHeight, min_value, max_value);
-    }
+    display_legend(winWidth, winHeight, min_value, max_value);
+
 }
 
 void Visualization::toggle(Option option)
