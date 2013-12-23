@@ -186,11 +186,11 @@ void Fluids::build_gui()
 	GLUI_Panel *nr_glyph_panel = new GLUI_Panel(glyph_rollout, "Number of glyphs");	
 	glyph_x_spinner = glui->add_spinner_to_panel(nr_glyph_panel, "X", GLUI_SPINNER_INT , &visualization.number_of_glyphs_x, NRGLYPHSX, glui_callback );	
 	glyph_x_spinner->set_speed(1); 
-	glyph_x_spinner->set_int_limits(0,120);
+	glyph_x_spinner->set_int_limits(0,Simulation::DIM);
 	glyph_x_spinner->set_int_val(visualization.number_of_glyphs_x);
 	glyph_y_spinner = glui->add_spinner_to_panel(nr_glyph_panel, "Y", GLUI_SPINNER_INT , &visualization.number_of_glyphs_y, NRGLYPHSY, glui_callback );	
 	glyph_y_spinner->set_speed(1); 
-	glyph_y_spinner->set_int_limits(0,120);
+	glyph_y_spinner->set_int_limits(0,Simulation::DIM);
 	glyph_y_spinner->set_int_val(visualization.number_of_glyphs_y);
 
 	GLUI_Panel *type_glyph_panel = new GLUI_Panel(glyph_rollout, "Glyph type");	
@@ -254,7 +254,7 @@ void Fluids::reshape(int w, int h)
  	// glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
+	glOrtho(0.0, (GLdouble)w, 0.0, (GLdouble)h, -100,100);
 	winWidth = w; winHeight = h;
 }
 

@@ -24,7 +24,7 @@ public:
 	void toggle_frozen();
 	void insert_forces(int X, int Y, double dx, double dy);
 
-    static const int DIM = 120;				//size of simulation grid
+    static const int DIM = 60;				//size of simulation grid
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation

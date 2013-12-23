@@ -19,8 +19,8 @@ void Visualization::init_parameters()
     selected_vector = VelocityVector;
     clamp_min = 0;
     clamp_max = 1;
-    number_of_glyphs_x = 12;
-    number_of_glyphs_y = 12;
+    number_of_glyphs_x = Simulation::DIM;
+    number_of_glyphs_y = Simulation::DIM;
 }
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
@@ -296,24 +296,28 @@ void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_
 }
 
 void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y)
-{
+{            
+
+    float multiplier = Simulation::DIM/(sqrt(number_of_glyphs_y*number_of_glyphs_x)*3); // divided by 3 to make cones not overlap 
+
     switch(selected_glyph) {
         case Hedgehog: 
         {
             glVertex2f(wn + (fftw_real) glyph_point_x * wn, hn + (fftw_real) glyph_point_y * hn);
-            glVertex2f((wn + (fftw_real) glyph_point_x * wn) + vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + vec_scale * value_y);
+            glVertex2f((wn + (fftw_real) glyph_point_x * wn) + multiplier * vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + multiplier * vec_scale * value_y);
         } break;
         case Cone:
         {
-            float angle = rad2deg(atan2(value_x,value_y));
-            float size = sqrt(value_x*value_x+value_y*value_y)*10;
+            float angle = rad2deg(atan2(value_y,value_x));
+            float size = sqrt(value_x*value_x+value_y*value_y)*vec_scale;
 
             glPushMatrix();
-            glTranslatef(wn*glyph_point_x, hn*glyph_point_y, 0);
-            glRotatef(angle, 1.0, 1.0, 0.0);
+            glTranslatef(wn*glyph_point_x, hn*glyph_point_y, 10);
+            glRotatef(angle, 0.0, 0.0, 1.0);
+            glRotatef(270.0, 1.0, 0.0, 0.0);
 
-            glRotatef(90, 0.0, 0, 1.0);
-            glutSolidCone(5, 15, 12, 12);
+
+            glutSolidCone(3*multiplier, size*multiplier, 12,12);
             glPopMatrix();
         }
     }
@@ -379,8 +383,8 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
             {
                 idx = (j * number_of_glyphs_y) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
 
-                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x) + 0.00001;
-                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y) + 0.00001;
+                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
+                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
                 
                 // if(glyph_point_x%1==0)
                 // if(glyph_point_x%1==0)
@@ -409,16 +413,33 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 // cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
                 // }
 
-                float bottom_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_lower_right];
-                float bottom_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_lower_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_lower_right];
-                float top_value_x = (ceil(glyph_point_x)-glyph_point_x)*dataset_x[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_x[idx_upper_right];
-                float top_value_y = (ceil(glyph_point_x)-glyph_point_x)*dataset_y[idx_upper_left]+(glyph_point_x-floor(glyph_point_x))*dataset_y[idx_upper_right];
+                float bottom_value_x, bottom_value_y, top_value_x, top_value_y;
+                bottom_value_x = top_value_x = dataset_x[idx_lower_left];
+                bottom_value_y = top_value_y = dataset_y[idx_lower_left];
+                if(glyph_point_x != (int) glyph_point_x) 
+                {
+                    float ceil_x = (ceil(glyph_point_x)-glyph_point_x);
+                    float floor_x = (glyph_point_x-floor(glyph_point_x));
+                    bottom_value_x = ceil_x*dataset_x[idx_lower_left]+floor_x*dataset_x[idx_lower_right];
+                    bottom_value_y = ceil_x*dataset_y[idx_lower_left]+floor_x*dataset_y[idx_lower_right];
+                    top_value_x =    ceil_x*dataset_x[idx_upper_left]+floor_x*dataset_x[idx_upper_right];
+                    top_value_y =    ceil_x*dataset_y[idx_upper_left]+floor_x*dataset_y[idx_upper_right];
+                } 
+                
                 // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
                 //     cout << bottom_value_x << "  values bottom x" << bottom_value_y << " values bottom y" <<  "\n"; // altijd 0 nu
                 //     cout << top_value_x << "  values top x" << top_value_y << " values top y" <<  "\n"; // altijd 0 nu
                 // }
-                float value_x = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_x+(glyph_point_y-floor(glyph_point_y))*top_value_x;
-                float value_y = (ceil(glyph_point_y)-glyph_point_y)*bottom_value_y+(glyph_point_y-floor(glyph_point_y))*top_value_y;
+                float value_x, value_y;
+                value_x = bottom_value_x;
+                value_y = bottom_value_y;
+                if(glyph_point_y != (int) glyph_point_y) 
+                {
+                    float ceil_y = (ceil(glyph_point_y)-glyph_point_y);
+                    float floor_y = (glyph_point_y-floor(glyph_point_y));
+                    value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
+                    value_y = ceil_y*bottom_value_y+floor_y*top_value_y;
+                }
                 // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
                 //     cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
                 // }
