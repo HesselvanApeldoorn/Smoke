@@ -54,7 +54,8 @@ public:
 	enum GlyphType // Different types of glyphs
 	{
 		Hedgehog,
-		Cone
+		Cone,
+		Arrow
 	};
 
 	Visualization();

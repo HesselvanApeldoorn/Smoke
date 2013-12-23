@@ -299,12 +299,18 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
 {            
 
     float multiplier = Simulation::DIM/(sqrt(number_of_glyphs_y*number_of_glyphs_x)*3); // divided by 3 to make cones not overlap 
+    float x1 = wn + (fftw_real) glyph_point_x * wn;
+    float y1 = hn + (fftw_real) glyph_point_y * hn;
+    float x2 = x1 + multiplier * vec_scale * value_x; 
+    float y2 = y1 + multiplier * vec_scale * value_y;
 
     switch(selected_glyph) {
         case Hedgehog: 
         {
-            glVertex2f(wn + (fftw_real) glyph_point_x * wn, hn + (fftw_real) glyph_point_y * hn);
-            glVertex2f((wn + (fftw_real) glyph_point_x * wn) + multiplier * vec_scale * value_x, (hn + (fftw_real) glyph_point_y * hn) + multiplier * vec_scale * value_y);
+           glBegin(GL_LINES);
+            glVertex2f(x1, y1);
+            glVertex2f(x2, y2);
+           glEnd();
         } break;
         case Cone:
         {
@@ -319,6 +325,26 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
 
             glutSolidCone(3*multiplier, size*multiplier, 12,12);
             glPopMatrix();
+        } break;
+        case Arrow:
+        {
+    
+            //arrowhead
+            glBegin(GL_TRIANGLES);
+             double join_angle = M_PI / 6.0; // 30 degrees
+             double stem_angle = atan2(y2-y1, x2-x1);
+             int w = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))/1.5;
+             glVertex2f(x2, y2);
+             glVertex2f(x2 - w*cos(stem_angle+join_angle), y2 - w*sin(stem_angle+join_angle));
+             glVertex2f(x2 - w*cos(stem_angle-join_angle), y2 - w*sin(stem_angle-join_angle));
+            glEnd();
+
+            //arrow line
+            glBegin(GL_LINES);
+             glVertex2f(x1, y1);
+             glVertex2f(x2, y2);
+            glEnd();
+            
         }
     }
 }
@@ -381,7 +407,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
         {
             for (j = 0; j < number_of_glyphs_y; j++)
             {
-                idx = (j * number_of_glyphs_y) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
+                idx = (j * DIM) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
 
                 float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
                 float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);

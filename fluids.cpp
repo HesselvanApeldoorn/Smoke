@@ -197,6 +197,7 @@ void Fluids::build_gui()
 	GLUI_RadioGroup *glyph_radio = glui->add_radiogroup_to_panel(type_glyph_panel, &visualization.selected_glyph);
 	glui->add_radiobutton_to_group(glyph_radio, "Hedgehog");
 	glui->add_radiobutton_to_group(glyph_radio, "Cone");
+	glui->add_radiobutton_to_group(glyph_radio, "Arrow");
 
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
