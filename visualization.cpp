@@ -295,6 +295,42 @@ void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_
 
 }
 
+void Visualization::interpolation(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y)
+{
+    int DIM = Simulation::DIM;
+    *glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
+    *glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
+
+
+    int idx_lower_left = floor(*glyph_point_x)+DIM*floor(*glyph_point_y);
+    int idx_lower_right = ceil(*glyph_point_x)+DIM*floor(*glyph_point_y);
+    int idx_upper_left = floor(*glyph_point_x)+DIM*ceil(*glyph_point_y);
+    int idx_upper_right = ceil(*glyph_point_x)+DIM*ceil(*glyph_point_y);
+
+    float bottom_value_x, bottom_value_y, top_value_x, top_value_y;
+    bottom_value_x = top_value_x = dataset_x[idx_lower_left];
+    bottom_value_y = top_value_y = dataset_y[idx_lower_left];
+    if(*glyph_point_x != (int) *glyph_point_x) // check if whole number
+    {
+        float ceil_x = (ceil(*glyph_point_x)-*glyph_point_x);
+        float floor_x = (*glyph_point_x-floor(*glyph_point_x));
+        bottom_value_x = ceil_x*dataset_x[idx_lower_left]+floor_x*dataset_x[idx_lower_right];
+        bottom_value_y = ceil_x*dataset_y[idx_lower_left]+floor_x*dataset_y[idx_lower_right];
+        top_value_x =    ceil_x*dataset_x[idx_upper_left]+floor_x*dataset_x[idx_upper_right];
+        top_value_y =    ceil_x*dataset_y[idx_upper_left]+floor_x*dataset_y[idx_upper_right];
+    } 
+
+    *value_x = bottom_value_x;
+    *value_y = bottom_value_y;
+    if(*glyph_point_y != (int) *glyph_point_y) // check if whole number
+    {
+        float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
+        float floor_y = (*glyph_point_y-floor(*glyph_point_y));
+        *value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
+        *value_y = ceil_y*bottom_value_y+floor_y*top_value_y;
+    }
+}
+
 void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y)
 {            
 
@@ -352,7 +388,7 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
-    int i, j, idx; 
+    int i, j; 
     const int DIM = Simulation::DIM;
     fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
@@ -402,91 +438,51 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
     if (options[DrawVecs])
     {
-        glBegin(GL_LINES);                //draw vectors
+
+        fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
+        switch(selected_scalar)
+        {
+            case DensityScalar: 
+            {
+                dataset_x_scalar=simulation.rho; dataset_y_scalar=simulation.rho;
+            } break;
+            case VelocityScalar: 
+            {
+                dataset_x_scalar=simulation.vx; dataset_y_scalar=simulation.vy;
+            } break;
+            case ForceScalar: 
+            {
+                dataset_x_scalar=simulation.fx; dataset_y_scalar=simulation.fy;
+            } break;
+        }
+
+        switch(selected_vector)
+        {
+            case VelocityVector: {dataset_x_vector=simulation.vx; dataset_y_vector=simulation.vy;} break;
+            case ForceVector: {dataset_x_vector=simulation.fx; dataset_y_vector=simulation.fy;} break;
+        }
+
         for (i = 0; i < number_of_glyphs_x; i++)
         {
             for (j = 0; j < number_of_glyphs_y; j++)
             {
-                idx = (j * DIM) + i; // take 4 surrounding points: floor(glyphx), floor(glyphy); ceil(glyphx), floor(glyphy); floor(glyphx), ceil(glyphy); ceil(glyphx), ceil(glyphy);
+                float value_x, value_y, glyph_point_x, glyph_point_y;
 
-                float glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
-                float glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
-                
-                // if(glyph_point_x%1==0)
-                // if(glyph_point_x%1==0)
-                
-                fftw_real *dataset_x, *dataset_y;
-                switch(selected_scalar)
-                {
-                    case DensityScalar: 
-                    {
-                        dataset_x=simulation.rho; dataset_y=simulation.rho;
-                    } break;
-                    case VelocityScalar: 
-                    {
-                        dataset_x=simulation.vx; dataset_y=simulation.vy;
-                    } break;
-                    case ForceScalar: 
-                    {
-                        dataset_x=simulation.fx; dataset_y=simulation.fy;
-                    } break;
-                }
-                int idx_lower_left = floor(glyph_point_x)+DIM*floor(glyph_point_y);
-                int idx_lower_right = ceil(glyph_point_x)+DIM*floor(glyph_point_y);
-                int idx_upper_left = floor(glyph_point_x)+DIM*ceil(glyph_point_y);
-                int idx_upper_right = ceil(glyph_point_x)+DIM*ceil(glyph_point_y);
-                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                // cout << idx_lower_left << " krakra" << idx_upper_right << "\n";
-                // }
-
-                float bottom_value_x, bottom_value_y, top_value_x, top_value_y;
-                bottom_value_x = top_value_x = dataset_x[idx_lower_left];
-                bottom_value_y = top_value_y = dataset_y[idx_lower_left];
-                if(glyph_point_x != (int) glyph_point_x) 
-                {
-                    float ceil_x = (ceil(glyph_point_x)-glyph_point_x);
-                    float floor_x = (glyph_point_x-floor(glyph_point_x));
-                    bottom_value_x = ceil_x*dataset_x[idx_lower_left]+floor_x*dataset_x[idx_lower_right];
-                    bottom_value_y = ceil_x*dataset_y[idx_lower_left]+floor_x*dataset_y[idx_lower_right];
-                    top_value_x =    ceil_x*dataset_x[idx_upper_left]+floor_x*dataset_x[idx_upper_right];
-                    top_value_y =    ceil_x*dataset_y[idx_upper_left]+floor_x*dataset_y[idx_upper_right];
-                } 
-                
-                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                //     cout << bottom_value_x << "  values bottom x" << bottom_value_y << " values bottom y" <<  "\n"; // altijd 0 nu
-                //     cout << top_value_x << "  values top x" << top_value_y << " values top y" <<  "\n"; // altijd 0 nu
-                // }
-                float value_x, value_y;
-                value_x = bottom_value_x;
-                value_y = bottom_value_y;
-                if(glyph_point_y != (int) glyph_point_y) 
-                {
-                    float ceil_y = (ceil(glyph_point_y)-glyph_point_y);
-                    float floor_y = (glyph_point_y-floor(glyph_point_y));
-                    value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
-                    value_y = ceil_y*bottom_value_y+floor_y*top_value_y;
-                }
-                // if (glyph_point_x > 58 && glyph_point_x < 60 && glyph_point_y > 58 && glyph_point_y < 60) {
-                //     cout << value_x << "  values x y" << value_y << "\n"; // altijd 0 nu
-                // }
+                interpolation(dataset_x_scalar, dataset_y_scalar, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
 
                 float f;
                 if(selected_scalar==DensityScalar) {
                     f = value_x;
                 } else {
                     f = atan2(value_y,value_x) / M_PI + 1;
+                }
 
-                }
                 direction_to_color(f, min_value, max_value);
-                switch(selected_vector)
-                {
-                    case VelocityVector: {value_x=simulation.vx[idx]; value_y=simulation.vy[idx];} break;
-                    case ForceVector: {value_x=simulation.fx[idx]; value_y=simulation.fy[idx];} break;
-                }
+
+                interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
                 draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
             }
         }
-        glEnd();
     }
 
     display_legend(winWidth, winHeight, min_value, max_value);
