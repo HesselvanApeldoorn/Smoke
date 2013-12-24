@@ -180,6 +180,7 @@ void Fluids::build_gui()
 	GLUI_RadioGroup *vector_radio = glui->add_radiogroup_to_panel(vector_panel, &visualization.selected_vector);
 	glui->add_radiobutton_to_group(vector_radio, "Velocity (vx,vy)");
 	glui->add_radiobutton_to_group(vector_radio, "Force (fx, fy)");
+	glui->add_radiobutton_to_group(vector_radio, "Gradient");
 
 	GLUI_Rollout *glyph_rollout = new GLUI_Rollout(glui, "Glyphs", true );
 
