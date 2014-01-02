@@ -356,15 +356,21 @@ void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, 
         top_value_y =    ceil_x*dataset_y[idx_upper_left]+floor_x*dataset_y[idx_upper_right];
     } 
 
-    *value_x = bottom_value_x;
-    *value_y = bottom_value_y;
+    *value_x = top_value_x;
+    *value_y = top_value_y;
     if(*glyph_point_y != (int) *glyph_point_y) // check if whole number
     {
-        // float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
-        // float floor_y = (*glyph_point_y-floor(*glyph_point_y));
-        // *value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
-        // *value_y = ceil_y*bottom_value_y+floor_y*top_value_y;
-        *value_y = top_value_y - bottom_value_y;
+        // // float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
+        // // float floor_y = (*glyph_point_y-floor(*glyph_point_y));
+        // // *value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
+
+        // *value_x = top_value_x - bottom_value_x;
+        // *value_y = top_value_y - bottom_value_y;
+
+        float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
+        float floor_y = (*glyph_point_y-floor(*glyph_point_y));
+        *value_x = floor_y*top_value_x-ceil_y*bottom_value_x;
+        *value_y = floor_y*top_value_y-ceil_y*bottom_value_y;
     }
 
     float length_vector = sqrt(*value_x**value_x+*value_y**value_y);
