@@ -368,7 +368,7 @@ void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, 
         *value_x = (dataset_x[idx_upper_right]-dataset_x[idx_upper_left])-(dataset_x[idx_lower_right]-dataset_x[idx_lower_left]);
         *value_y = (dataset_y[idx_upper_right]-dataset_y[idx_upper_left])-(dataset_y[idx_lower_right]-dataset_y[idx_lower_left]);    
     } else // selected_scalar == DensityScalar
-    {
+    { // TODO: fix scaling of glyphs
         float right_x = (dataset_x[idx_upper_right]+dataset_x[idx_lower_right])/2;
         float left_x = (dataset_x[idx_upper_left]+dataset_x[idx_lower_left])/2;
         float top_y = (dataset_y[idx_upper_right]+dataset_y[idx_upper_left])/2;
