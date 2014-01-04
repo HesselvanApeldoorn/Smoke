@@ -381,31 +381,6 @@ void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, 
 
 }
 
-
-
-
-// void Visualization::vector_gradient(fftw_real* data, float *value_x, float *value_y, fftw_real *dataset_x, fftw_real *dataset_y)
-// {
-//     // compute neighbor indices
-//     // int x = index1D % Simulation::DIM;
-//     // int y = index1D / Simulation::DIM;
-//     int right = modIndex1D(x+1, y);
-//     int left = modIndex1D(x-1, y);
-//     int top = modIndex1D(x, y-1);
-//     int bottom = modIndex1D(x, y+1);
-
-//     // partial derivative to x and y
-//     float dx = data[right] - data[left];
-//     float dy = data[top] - data[bottom];
-
-//     // Vector2f grad(dx, dy);
-
-//     // if (grad.length() > 0)
-//     //     grad.normalize();
-
-//     // return grad;
-// }
-
 void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y)
 {            
 
