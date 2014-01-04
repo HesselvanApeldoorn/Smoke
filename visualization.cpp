@@ -450,8 +450,9 @@ void Visualization::draw_streamlines(float render_w, float render_h, float cell_
     const float grid_area_h = render_h - 2.0 * cell_h;
 
     // for every seed point, trace a streamline
-    // for (size_t seed_index = 0; seed_index < seedpoints.size(); ++seed_index)
-    // {
+    for (size_t seed_index = 0; seed_index < seedpoints.size(); ++seed_index)
+    {
+        
     //     // Release seed and follow it until it reaches a maximum number of segments
     //     Vector2f p0(seedpoints[seed_index]); // current point (x0, y0)
     //     Vector2f p1;
@@ -483,7 +484,7 @@ void Visualization::draw_streamlines(float render_w, float render_h, float cell_
     //         time += dt;
     //         p0 = p1;
     //     }
-    // }
+    }
 }
 
 //visualize: This is the main visualization function

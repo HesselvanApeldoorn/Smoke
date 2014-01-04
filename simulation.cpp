@@ -187,3 +187,8 @@ void Simulation::toggle_frozen()
 {
 	frozen = 1-frozen;
 }
+
+void Simulation::add_seedpoint()
+{
+	seedpoints[0] = new Streamline(30.0f, 30.0f);
+}

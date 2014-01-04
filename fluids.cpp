@@ -211,10 +211,11 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+	  case 's': simulation.add_seedpoint(); break;
 	  case 't': simulation.change_timestep(-0.001); break;
 	  case 'T': simulation.change_timestep(+0.001); break;
-	  case 'S': visualization.change_hedgehog(1.2); break;
-	  case 's': visualization.change_hedgehog(0.8); break;
+	  case 'H': visualization.change_hedgehog(1.2); break;
+	  case 'h': visualization.change_hedgehog(0.8); break;
 	  case 'V': simulation.change_viscosity(5); break;
 	  case 'v': simulation.change_viscosity(0.2);; break;
 	  case 'x': visualization.toggle(Visualization::DrawSmoke);
