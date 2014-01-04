@@ -26,7 +26,8 @@ public:
 	{
 		DrawSmoke, 		//draw the smoke or not
 		DrawVecs,       //draw the vector field or not
-		Scaling,		//Apply scaling or not
+		Scaling,		//apply scaling or not
+		DrawStreamlines,//draw the streamlines or not
 		OptionSize		//auto assigned (last in enum==size of enum)
 	};
 
@@ -101,7 +102,7 @@ private:
 	void interpolation(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y);
-
+	void draw_streamlines(float render_w, float render_h, float cell_w, float cell_h) const;
 	int options[OptionSize];
 
 	//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

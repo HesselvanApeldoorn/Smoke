@@ -12,8 +12,9 @@ void Visualization::init_parameters()
     // color_dir = 0;            //use direction color-coding or not
     vec_scale = 1000;           //scaling of hedgehogs
     number_of_colors = 256;     // number of colors used
-    options[DrawSmoke] = true;           //draw the smoke or not
-    options[DrawVecs] = false;            //draw the vector field or not
+    options[DrawSmoke] = false;           //draw the smoke or not
+    options[DrawVecs] = true;            //draw the vector field or not
+    options[DrawStreamlines] = false;
     selected_colormap = Rainbow;
     selected_scalar = VelocityScalar;
     selected_vector = VelocityVector;
@@ -435,6 +436,56 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
     }
 }
 
+void Visualization::draw_streamlines(float render_w, float render_h, float cell_w, float cell_h) const
+{
+    const float dt  = 0.25;                 // fixed time step
+    const size_t segments_per_line = 1500;  // fixed max segments
+    const float max_time = 1000.0;          // fixed max time
+
+    const float xscale = static_cast<float>(Simulation::DIM) / render_w;
+    const float yscale = static_cast<float>(Simulation::DIM) / render_h;
+
+    // grid render size in pixels
+    const float grid_area_w = render_w - 2.0 * cell_w;
+    const float grid_area_h = render_h - 2.0 * cell_h;
+
+    // for every seed point, trace a streamline
+    // for (size_t seed_index = 0; seed_index < seedpoints.size(); ++seed_index)
+    // {
+    //     // Release seed and follow it until it reaches a maximum number of segments
+    //     Vector2f p0(seedpoints[seed_index]); // current point (x0, y0)
+    //     Vector2f p1;
+    //     float time  = 0.0;
+    //     size_t segments = 0;
+    //     while(segments < segments_per_line && time < max_time)
+    //     {
+    //         // stick within the grid render area
+    //         if (p0.x < cell_w) p0.x += grid_area_w;
+    //         if (p0.y < cell_h) p0.y += grid_area_h;
+    //         if (p0.x >= (cell_w + render_w)) p0.x -= grid_area_w;
+    //         if (p0.y >= render_h - cell_h) p0.y -= grid_area_h;
+
+    //         // nearest-neighbor interpolation
+    //         size_t i = static_cast<int>(p0.x * xscale);
+    //         size_t j = static_cast<int>(p0.y * yscale);
+    //         size_t index1D = j * Simulation::DIM + i;
+
+    //         // velocity at nearest grid location
+    //         Vector2f velocity(simulation.vx[index1D], simulation.vy[index1D]);
+    //         if (velocity.length() > 0) // don't divide by zero
+    //             velocity.normalize();
+
+    //         p1 = p0 + velocity * dt;
+    //         glVertex2f(p0.x, p0.y);
+    //         glVertex2f(p1.x, p1.y);
+
+    //         segments++;
+    //         time += dt;
+    //         p0 = p1;
+    //     }
+    // }
+}
+
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
@@ -536,6 +587,11 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
             }
         }
+    }
+    if (options[DrawStreamlines])
+    {
+        //draw_streamlines(render_w, render_h, cell_w, cell_h);
+        draw_streamlines(Simulation::DIM, Simulation::DIM, 5, 5);
     }
 
     display_legend(winWidth, winHeight, min_value, max_value);
