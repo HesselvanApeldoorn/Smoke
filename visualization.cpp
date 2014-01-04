@@ -333,87 +333,6 @@ void Visualization::interpolation(fftw_real *dataset_x, fftw_real* dataset_y, in
 
 void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y)
 {
-    int DIM = Simulation::DIM;
-    *glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
-    *glyph_point_y = (float)j*((float)DIM/(float)number_of_glyphs_y);
-
-
-    int idx_lower_left = floor(*glyph_point_x)+DIM*floor(*glyph_point_y);
-    int idx_lower_right = ceil(*glyph_point_x)+DIM*floor(*glyph_point_y);
-    int idx_upper_left = floor(*glyph_point_x)+DIM*ceil(*glyph_point_y);
-    int idx_upper_right = ceil(*glyph_point_x)+DIM*ceil(*glyph_point_y);
-    float bottom_value_x, bottom_value_y, top_value_x, top_value_y;
-    bottom_value_x = top_value_x = dataset_x[idx_lower_left];
-    bottom_value_y = top_value_y = dataset_y[idx_lower_left];
-
-    if(*glyph_point_x != (int) *glyph_point_x) // check if whole number
-    {
-        float ceil_x = (ceil(*glyph_point_x)-*glyph_point_x);
-        float floor_x = (*glyph_point_x-floor(*glyph_point_x));
-        bottom_value_x = ceil_x*dataset_x[idx_lower_left]+floor_x*dataset_x[idx_lower_right];
-        bottom_value_y = ceil_x*dataset_y[idx_lower_left]+floor_x*dataset_y[idx_lower_right];
-        top_value_x =    ceil_x*dataset_x[idx_upper_left]+floor_x*dataset_x[idx_upper_right];
-        top_value_y =    ceil_x*dataset_y[idx_upper_left]+floor_x*dataset_y[idx_upper_right];
-    } 
-
-    *value_x = top_value_x;
-    *value_y = top_value_y;
-    if(*glyph_point_y != (int) *glyph_point_y) // check if whole number
-    {
-        // // float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
-        // // float floor_y = (*glyph_point_y-floor(*glyph_point_y));
-        // // *value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
-
-        // *value_x = top_value_x - bottom_value_x;
-        if (selected_vector == GradientVector)
-        {
-            *value_y = top_value_y - bottom_value_y;
-        } else 
-        {
-            float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
-            float floor_y = (*glyph_point_y-floor(*glyph_point_y));
-            *value_x = floor_y*top_value_x-ceil_y*bottom_value_x;
-            *value_y = floor_y*top_value_y-ceil_y*bottom_value_y;
-        }
-    }
-
-    float left_value_x, right_value_x;
-    if (selected_vector == GradientVector)
-    {
-
-        if(*glyph_point_y != (int) *glyph_point_y) // check if whole number
-        {
-            float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
-            float floor_y = (*glyph_point_y-floor(*glyph_point_y));
-            // bottom_value_y = ceil_y*dataset_y[idx_lower_left]+floor_y*dataset_y[idx_lower_right];
-            left_value_x = ceil_y*dataset_x[idx_lower_left]+floor_y*dataset_x[idx_upper_left];
-            // top_value_y =    ceil_y*dataset_y[idx_upper_left]+floor_y*dataset_y[idx_upper_right];
-            right_value_x =    ceil_y*dataset_x[idx_lower_right]+floor_y*dataset_x[idx_upper_right];
-        } 
-
-        *value_x = bottom_value_x;
-        // *value_y = bottom_value_y;
-        if(*glyph_point_x != (int) *glyph_point_x) // check if whole number
-        {
-            // float ceil_y = (ceil(*glyph_point_y)-*glyph_point_y);
-            // float floor_y = (*glyph_point_y-floor(*glyph_point_y));
-            // *value_x = ceil_y*bottom_value_x+floor_y*top_value_x;
-            // *value_y = ceil_y*bottom_value_y+floor_y*top_value_y;
-            *value_x = right_value_x - left_value_x;
-        }
-    }
-
-    float length_vector = sqrt(*value_x**value_x+*value_y**value_y);
-    if (length_vector>0) 
-    {
-        *value_x = *value_x/length_vector;
-        *value_y = *value_y/length_vector;
-    }
-}
-
-
-void Visualization::vector_gradient_velocity(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y)
-{
 
     int DIM = Simulation::DIM;
     *glyph_point_x = (float)i*((float)DIM/(float)number_of_glyphs_x);
@@ -442,17 +361,25 @@ void Visualization::vector_gradient_velocity(fftw_real *dataset_x, fftw_real* da
         idx_lower_right = (idx_lower_right+DIM*DIM-DIM)%(DIM*DIM);
         idx_upper_left = (idx_upper_left+DIM*DIM+DIM)%(DIM*DIM);
         idx_upper_right = (idx_upper_right+DIM*DIM+DIM)%(DIM*DIM);
-    } // else vector lies in between 4 gridpoints, indexes are okay
+    } // else vector lies in between 4 gridpoints, indexes are okay as they are now
 
-    *value_x = (dataset_x[idx_upper_right]-dataset_x[idx_upper_left])-(dataset_x[idx_lower_right]-dataset_x[idx_lower_left]);
-    *value_y = (dataset_y[idx_upper_right]-dataset_y[idx_upper_left])-(dataset_y[idx_lower_right]-dataset_y[idx_lower_left]);
+    if (selected_scalar == VelocityScalar)
+    {
+        *value_x = (dataset_x[idx_upper_right]-dataset_x[idx_upper_left])-(dataset_x[idx_lower_right]-dataset_x[idx_lower_left]);
+        *value_y = (dataset_y[idx_upper_right]-dataset_y[idx_upper_left])-(dataset_y[idx_lower_right]-dataset_y[idx_lower_left]);    
+    } else // selected_scalar == DensityScalar
+    {
+        float right_x = (dataset_x[idx_upper_right]+dataset_x[idx_lower_right])/2;
+        float left_x = (dataset_x[idx_upper_left]+dataset_x[idx_lower_left])/2;
+        float top_y = (dataset_y[idx_upper_right]+dataset_y[idx_upper_left])/2;
+        float bottom_y = (dataset_y[idx_lower_right]+dataset_y[idx_lower_left])/2;
+
+        // since dataset_x and dataset_y are equal, a difference in computing the derivatives has been used x = dx dy and y = dy dx
+        *value_x = right_x - left_x;
+        *value_y = top_y - bottom_y;
+    }
+
 }
-
-void Visualization::vector_gradient_density(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y) 
-{
-    cout << "kaas";
-}
-
 
 
 
@@ -630,12 +557,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 if (selected_vector != GradientVector) 
                     interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
                 else
-                {
-                    if (selected_scalar == VelocityScalar)
-                        vector_gradient_velocity(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
-                    else
-                        vector_gradient_density(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
-                }
+                    vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
                 draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
             }
         }
