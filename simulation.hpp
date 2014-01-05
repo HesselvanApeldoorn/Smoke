@@ -23,13 +23,13 @@ public:
 	void change_viscosity(double viscosity);
 	void toggle_frozen();
 	void insert_forces(int X, int Y, double dx, double dy);
-	void add_seedpoint(void);
+	void add_seedpoint();
 
     static const int DIM = 60;				//size of simulation grid
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation
-	static Streamline seedpoints[5];
+	// static Streamline* seedpoints[5];
 
 private:
 	void FFT(int direction,void* vx);

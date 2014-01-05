@@ -1,5 +1,8 @@
 #include "simulation.hpp"
 
+
+static Streamline* seedpoints[5];
+
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
 Simulation::Simulation()
 {
@@ -190,5 +193,5 @@ void Simulation::toggle_frozen()
 
 void Simulation::add_seedpoint()
 {
-	//seedpoints[0] = Streamline(30.0f, 30.0f);
+	*seedpoints[0] = Streamline(30.0f, 30.0f);
 }
