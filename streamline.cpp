@@ -1,10 +1,23 @@
-class Streamline {
-	float x, y;
-  public:
-    void set_values (float,float);
-};
+#include "streamline.hpp"
 
-void Streamline::set_values (float x, float y) {
-  this->x = x;
-  this->y = y;
+// class Streamline 
+// {
+//   public:
+//   	Streamline();
+//   	Streamline(float x, float y);
+//   private:
+//   	  float x, y;
+// };
+
+Streamline::Streamline()
+{
+	this->x = 0;
+	this->y = 0;
+}
+
+
+Streamline::Streamline(float x, float y) 
+{
+	  this->x = x;
+	  this->y = y;
 }

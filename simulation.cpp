@@ -1,7 +1,6 @@
 #include "simulation.hpp"
 
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
-
 Simulation::Simulation()
 {
 	init_parameters();
@@ -14,6 +13,7 @@ void Simulation::init_parameters()
 	frozen = 0;
 	init_simulation();
 }
+
 //init_simulation: Initialize simulation data structures as a function of the grid size 'n'.
 //                 Although the simulation takes place on a 2D grid, we allocate all data structures as 1D arrays,
 //                 for compatibility with the FFTW numerical library.
@@ -190,5 +190,5 @@ void Simulation::toggle_frozen()
 
 void Simulation::add_seedpoint()
 {
-	seedpoints[0] = new Streamline(30.0f, 30.0f);
+	//seedpoints[0] = Streamline(30.0f, 30.0f);
 }

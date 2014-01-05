@@ -29,7 +29,7 @@ public:
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation
-	Streamline seedpoints[5];
+	static Streamline seedpoints[5];
 
 private:
 	void FFT(int direction,void* vx);

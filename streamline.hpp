@@ -4,14 +4,17 @@
 #include "util.hpp"
 
 
-class Streamline {
-
-public:
-	void set_values(float, float y);
+class Streamline 
+{
 
 private:
 	float x;
 	float y;
+
+public:
+	Streamline();
+	Streamline(float x, float y);
+
 };
 
 #endif

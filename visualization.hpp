@@ -11,7 +11,7 @@
 
 #include "simulation.hpp"
 #include "util.hpp"
-
+#include "streamline.hpp"
 using namespace std;
 
 class Simulation;
