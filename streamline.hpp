@@ -8,13 +8,13 @@ class Streamline
 {
 
 private:
-	float x;
-	float y;
+
 
 public:
 	Streamline();
 	Streamline(float x, float y);
-
+	float x;
+	float y;
 };
 
 #endif

@@ -7,11 +7,14 @@
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <sstream>     // for ostringstream
 #include <string>
+#include <vector>
 #include <iostream>
 
 #include "simulation.hpp"
-#include "util.hpp"
 #include "streamline.hpp"
+#include "util.hpp"
+#include "vector2.hpp"
+
 using namespace std;
 
 class Simulation;
@@ -102,7 +105,7 @@ private:
 	void interpolation(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y);
-	void draw_streamlines(float render_w, float render_h, float cell_w, float cell_h) const;
+	void draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn) const;
 	int options[OptionSize];
 
 	//--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

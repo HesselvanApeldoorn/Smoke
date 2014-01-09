@@ -1,7 +1,7 @@
 #include "simulation.hpp"
 
 
-static Streamline* seedpoints[5];
+vector< vector<Vector2> > Simulation::seedpoints;
 
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
 Simulation::Simulation()
@@ -193,5 +193,6 @@ void Simulation::toggle_frozen()
 
 void Simulation::add_seedpoint()
 {
-	*seedpoints[0] = Streamline(30.0f, 30.0f);
+	seedpoints.push_back(vector<Vector2>());
+	seedpoints[seedpoints.size()-1].push_back(Vector2(900.0f, 100.0f));
 }

@@ -5,9 +5,12 @@
 #include <math.h>               //for various math functions
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <string>
+#include <vector>
 
 #include "util.hpp"
-#include "streamline.hpp"
+#include "vector2.hpp"
+
+using namespace std;
 
 class Simulation {
 
@@ -26,11 +29,13 @@ public:
 	void add_seedpoint();
 
     static const int DIM = 60;				//size of simulation grid
+    static const int STREAMLINE_LENGTH = 1500; // length of a streamline
+    static const int SEEDPOINTS_AMOUNT = 5; // amount of seedpoints
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation
-	// static Streamline* seedpoints[5];
-
+	// static Vector2 seedpoints[SEEDPOINTS_AMOUNT][STREAMLINE_LENGTH];
+	static vector< vector<Vector2> > seedpoints;
 private:
 	void FFT(int direction,void* vx);
 	float max(float x, float y);
