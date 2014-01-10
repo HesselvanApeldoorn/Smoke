@@ -1,7 +1,7 @@
 #include "simulation.hpp"
 
 
-vector< vector<Vector2> > Simulation::seedpoints;
+vector<Vector2> Simulation::seedpoints;
 
 //------ SIMULATION CODE STARTS HERE -----------------------------------------------------------------
 Simulation::Simulation()
@@ -195,6 +195,5 @@ void Simulation::toggle_frozen()
 
 void Simulation::add_seedpoint(int x, int y)
 {
-    seedpoints.push_back(vector<Vector2>());
-    seedpoints[seedpoints.size()-1].push_back(Vector2(x, y));
+    if(seedpoints.size()<SEEDPOINTS_AMOUNT) seedpoints.push_back(Vector2(x, y));
 }

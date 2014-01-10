@@ -32,12 +32,12 @@ public:
 
     static const int DIM = 60;				//size of simulation grid
     static const int STREAMLINE_LENGTH = 1500; // length of a streamline
-    static const int SEEDPOINTS_AMOUNT = 5; // amount of seedpoints
+    static const int SEEDPOINTS_AMOUNT = 100; // amount of seedpoints
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation
 	// static Vector2 seedpoints[SEEDPOINTS_AMOUNT][STREAMLINE_LENGTH];
-	static vector< vector<Vector2> > seedpoints;
+	static vector<Vector2> seedpoints;
 private:
 	void FFT(int direction,void* vx);
 	float max(float x, float y);

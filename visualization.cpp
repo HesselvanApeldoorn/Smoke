@@ -438,10 +438,10 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
     }
 }
 
-void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn) const
+void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value)
 {
     const float dt  = 0.25;                 // fixed time step
-    const size_t segments_per_line = 1500;  // fixed max segments
+    const size_t segments_per_line = Simulation::STREAMLINE_LENGTH;  // fixed max segments
     const float max_time = 1000.0;          // fixed max time
 
     const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
@@ -451,65 +451,50 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
     const float grid_area_w = winWidth - 2.0 * wn;
     const float grid_area_h = winHeight - 2.0 * hn;
 
-    // for every seed point, trace a streamline
-    // Streamline a = Simulation::seedpoints[0];
 
-    int seed_size = Simulation::seedpoints.size();//(sizeof(Simulation::seedpoints)/sizeof(vector<Vector2>));
-    // cout << seed_size << "<<<<<<size\n";
-    // int seed_size = 1;
+    int seed_size = Simulation::seedpoints.size();
+
     for (int seed_index = 0; seed_index < seed_size; ++seed_index)
     {
-        // printf("%d\n", seed_index);
-      
-        vector<Vector2> seedpoint = Simulation::seedpoints[seed_index];
-        int i;
-        float window_correction = (winWidth-200)*0.0015625; //TODO fix for window resizing
-        for(i = 0 ; i<(int)seedpoint.size()-1;i++) 
+  
+        float window_correction = (winWidth-200)*0.0015625; 
+       
+        Vector2 p0  = Simulation::seedpoints[seed_index]; // seedpoint
+        Vector2 p1;
+        float time = 0.0;
+        size_t segments = 0;
+        while(segments < segments_per_line && time<max_time)
         {
-            glBegin(GL_LINES);
-                glColor3f(1,1,1); //TODO remove
-                glVertex2f(seedpoint[i].x*window_correction, seedpoint[i].y);
-                // cout << seedpoint[i].x << ", " << seedpoint[i].y << "\n";
-                glVertex2f(seedpoint[i+1].x*window_correction, seedpoint[i+1].y);
-            glEnd();
-            // cout << "p0= (" << p0.x << "," << p0.y << ") p1=(" << p1.x << "," << p1.y << ")\n";
-
-            // segments++;
-            // time += dt;
-            // p0 = p1;
-        }
-        // glBegin(GL_QUADS); //Begin gl_quads
-
-        // glColor3f(1,1,1);
-        // glVertex2f(seedpoint[i+1].x*window_correction+2.5, seedpoint[i+1].y+2.5);  //Top right
-        // glVertex2f(seedpoint[i+1].x*window_correction+2.5, seedpoint[i+1].y-2.5); // Bottom bottom
-        // glVertex2f(seedpoint[i+1].x*window_correction-2.5, seedpoint[i+1].y+2.5); // Top left
-        // glVertex2f(seedpoint[i+1].x*window_correction-2.5, seedpoint[i+1].y-2.5); // Bottom left
-
-        // glEnd(); //End gl_quads
-
-        if((int)seedpoint.size() < Simulation::STREAMLINE_LENGTH)
-        {
-              // Release seed and follow it until it reaches a maximum number of segments
-            Vector2 p0  = seedpoint[seedpoint.size()-1]; // current point (x0, y0)
-            Vector2 p1;
-            if (p0.x < wn || p0.y < hn || p0.x >= wn + winWidth || p0.y >= winHeight - hn) continue;
+            if (p0.x < wn) p0.x += grid_area_w;
+            if (p0.y < hn) p0.y += grid_area_h;
+            if (p0.x >= (wn + winWidth)) p0.x -= grid_area_w;
+            if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
 
             // nearest-neighbor interpolation
             size_t i = static_cast<int>(p0.x * xscale);
             size_t j = static_cast<int>(p0.y * yscale);
-            size_t idx = j * Simulation::DIM + i;
 
+            size_t idx = j * (Simulation::DIM-1) + i;
             // velocity at nearest grid location
             Vector2 velocity = Vector2(simulation.vx[idx], simulation.vy[idx]);
+
             if (velocity.length() > 0) // don't divide by zero
                 velocity.normalize();
 
-            // cout << "vel=(" << velocity.x << "," << velocity.y <<") dt: " << dt << "\n";
-            // Vector2 test = (velocity * dt);
-            // cout << "sdfsf: (" << test.x << "," << test.y<< ")\n";
             p1 = p0 + velocity * dt*100;
-            if (!simulation.frozen) Simulation::seedpoints[seed_index].push_back(p1);
+
+            float f = atan2(simulation.vy[idx],simulation.vx[idx]) / M_PI + 1;
+
+            direction_to_color(f, min_value, max_value);
+
+            glBegin(GL_LINES);
+                glVertex2f(p0.x*window_correction, p0.y);
+                glVertex2f(p1.x*window_correction, p1.y);
+            glEnd();
+
+            segments++;
+            time+=dt;
+            p0=p1;
 
         }
     }
@@ -620,7 +605,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     if (options[DrawStreamlines])
     {
         //draw_streamlines(render_w, render_h, cell_w, cell_h);
-        draw_streamlines(simulation,winWidth, winHeight, wn,hn);
+        draw_streamlines(simulation,winWidth, winHeight, wn,hn, min_value, max_value);
     }
 
     display_legend(winWidth, winHeight, min_value, max_value);
