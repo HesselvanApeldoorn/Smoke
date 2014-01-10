@@ -332,7 +332,7 @@ void Visualization::interpolation(fftw_real *dataset_x, fftw_real* dataset_y, in
     }
 }
 
-void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y)
+void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y, float max_value)
 {
 
     int DIM = Simulation::DIM;
@@ -378,6 +378,8 @@ void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, 
         // since dataset_x and dataset_y are equal, a difference in computing the derivatives has been used x = dx dy and y = dy dx
         *value_x = right_x - left_x;
         *value_y = top_y - bottom_y;
+        *value_x /= max_value * 5;
+        *value_y /= max_value * 5;
     }
 
 }
@@ -446,25 +448,29 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
     const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
 
     // grid render size in pixels
-    const float grid_area_w = winWidth;// - 2.0 * wn;
-    const float grid_area_h = winHeight;// - 2.0 * hn;
+    const float grid_area_w = winWidth - 2.0 * wn;
+    const float grid_area_h = winHeight - 2.0 * hn;
 
     // for every seed point, trace a streamline
     // Streamline a = Simulation::seedpoints[0];
 
     int seed_size = Simulation::seedpoints.size();//(sizeof(Simulation::seedpoints)/sizeof(vector<Vector2>));
-    cout << seed_size << "<<<<<<size\n";
+    // cout << seed_size << "<<<<<<size\n";
     // int seed_size = 1;
     for (int seed_index = 0; seed_index < seed_size; ++seed_index)
     {
-        printf("%d\n", seed_index);
+        // printf("%d\n", seed_index);
       
         vector<Vector2> seedpoint = Simulation::seedpoints[seed_index];
-        for(int i = 0 ; i<(int)seedpoint.size()-1;i++) 
+        int i;
+        float window_correction = (winWidth-200)*0.0015625; //TODO fix for window resizing
+        for(i = 0 ; i<(int)seedpoint.size()-1;i++) 
         {
             glBegin(GL_LINES);
-                glVertex2f(seedpoint[i].x, seedpoint[i].y);
-                glVertex2f(seedpoint[i+1].x, seedpoint[i+1].y);
+                glColor3f(1,1,1); //TODO remove
+                glVertex2f(seedpoint[i].x*window_correction, seedpoint[i].y);
+                // cout << seedpoint[i].x << ", " << seedpoint[i].y << "\n";
+                glVertex2f(seedpoint[i+1].x*window_correction, seedpoint[i+1].y);
             glEnd();
             // cout << "p0= (" << p0.x << "," << p0.y << ") p1=(" << p1.x << "," << p1.y << ")\n";
 
@@ -472,23 +478,22 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
             // time += dt;
             // p0 = p1;
         }
+        // glBegin(GL_QUADS); //Begin gl_quads
+
+        // glColor3f(1,1,1);
+        // glVertex2f(seedpoint[i+1].x*window_correction+2.5, seedpoint[i+1].y+2.5);  //Top right
+        // glVertex2f(seedpoint[i+1].x*window_correction+2.5, seedpoint[i+1].y-2.5); // Bottom bottom
+        // glVertex2f(seedpoint[i+1].x*window_correction-2.5, seedpoint[i+1].y+2.5); // Top left
+        // glVertex2f(seedpoint[i+1].x*window_correction-2.5, seedpoint[i+1].y-2.5); // Bottom left
+
+        // glEnd(); //End gl_quads
+
         if((int)seedpoint.size() < Simulation::STREAMLINE_LENGTH)
         {
               // Release seed and follow it until it reaches a maximum number of segments
             Vector2 p0  = seedpoint[seedpoint.size()-1]; // current point (x0, y0)
             Vector2 p1;
-            // float time  = 0.0;
-            // size_t segments = 0;
-
-            // string hemmes;
-            // cout << "press letter and enter";
-            // cin >> hemmes;
-            // cout <<"ham";
-            // stick within the grid render area
-            if (p0.x < wn) p0.x += grid_area_w;
-            if (p0.y < hn) p0.y += grid_area_h;
-            if (p0.x >= (wn + winWidth)) p0.x -= grid_area_w;
-            if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
+            if (p0.x < wn || p0.y < hn || p0.x >= wn + winWidth || p0.y >= winHeight - hn) continue;
 
             // nearest-neighbor interpolation
             size_t i = static_cast<int>(p0.x * xscale);
@@ -503,8 +508,8 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
             // cout << "vel=(" << velocity.x << "," << velocity.y <<") dt: " << dt << "\n";
             // Vector2 test = (velocity * dt);
             // cout << "sdfsf: (" << test.x << "," << test.y<< ")\n";
-            p1 = p0 + velocity * dt*50;
-            Simulation::seedpoints[seed_index].push_back(p1);
+            p1 = p0 + velocity * dt*100;
+            if (!simulation.frozen) Simulation::seedpoints[seed_index].push_back(p1);
 
         }
     }
@@ -607,7 +612,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 if (selected_vector != GradientVector) 
                     interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
                 else
-                    vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
+                    vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y, max_value);
                 draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
             }
         }

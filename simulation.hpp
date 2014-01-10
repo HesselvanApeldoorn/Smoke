@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 #include "util.hpp"
 #include "vector2.hpp"
 
@@ -26,7 +28,7 @@ public:
 	void change_viscosity(double viscosity);
 	void toggle_frozen();
 	void insert_forces(int X, int Y, double dx, double dy);
-	void add_seedpoint();
+	void add_seedpoint(int x, int y);
 
     static const int DIM = 60;				//size of simulation grid
     static const int STREAMLINE_LENGTH = 1500; // length of a streamline

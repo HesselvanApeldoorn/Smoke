@@ -59,7 +59,9 @@ Fluids::Fluids(int argc, char **argv)
 	main_window = glutCreateWindow("Real-time smoke simulation and visualization");
 
 	glutDisplayFunc(display);
+	glutMouseFunc(click);
 	glutMotionFunc(drag);
+
 	glutKeyboardFunc(keyboard);
 
 	GLUI_Master.set_glutReshapeFunc(reshape);  
@@ -211,7 +213,7 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	  case 's': simulation.add_seedpoint(); break;
+	  // case 's': simulation.add_seedpoint(); break;
 	  case 't': simulation.change_timestep(-0.001); break;
 	  case 'T': simulation.change_timestep(+0.001); break;
 	  case 'H': visualization.change_hedgehog(1.2); break;
@@ -288,4 +290,14 @@ void Fluids::drag(int mx, int my)
 	simulation.insert_forces(X, Y, dx, dy);
 	
 	lmx = mx; lmy = my;
+}
+
+void Fluids::click(int button, int state, int mx, int my)
+{
+
+	if (button == GLUT_LEFT_BUTTON && state==GLUT_DOWN)
+    {
+    	my = winHeight-my;
+    	if(visualization.options[Visualization::DrawStreamlines]) simulation.add_seedpoint(mx,my);
+    }
 }
