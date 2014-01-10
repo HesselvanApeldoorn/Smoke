@@ -66,7 +66,20 @@ Fluids::Fluids(int argc, char **argv)
 
 	GLUI_Master.set_glutReshapeFunc(reshape);  
 	GLUI_Master.set_glutIdleFunc(update);
+	
 
+// 	glEnable(GL_COLOR_MATERIAL);
+//     glEnable (GL_DEPTH_TEST);
+//     glEnable (GL_LIGHTING);
+//     glEnable (GL_LIGHT0);
+
+// //Add directed light
+// 	GLfloat lightColor1[] = {0.5f, 0.2f, 0.2f, 1.0f}; //Color (0.5, 0.2, 0.2)
+// 	//Coming from the direction (-1, 0.5, 0.5)
+// 	GLfloat lightPos1[] = {-1.0f, 0.5f, 0.5f, 0.0f};
+// glLightfv(GL_LIGHT0, GL_AMBIENT, lightColor1);
+
+// glShadeModel(GL_SMOOTH); glEnable(GL_COLOR_MATERIAL); glEnable(GL_DEPTH_TEST);
 
 	simulation.init_simulation();	//initialize the simulation data structures
 

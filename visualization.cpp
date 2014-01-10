@@ -487,6 +487,15 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
             direction_to_color(f, min_value, max_value);
 
+            if(segments==0) {
+                glBegin(GL_QUADS); //Begin gl_quads
+                    glVertex2f(p0.x*window_correction-2.5, p0.y+2.5);  //Top left
+                    glVertex2f(p0.x*window_correction-2.5, p0.y-2.5); // Bottom left
+                    glVertex2f(p0.x*window_correction+2.5, p0.y-2.5); // Bottom right
+                    glVertex2f(p0.x*window_correction+2.5, p0.y+2.5); // Top right
+                glEnd(); //End gl_quads
+            }
+            
             glBegin(GL_LINES);
                 glVertex2f(p0.x*window_correction, p0.y);
                 glVertex2f(p1.x*window_correction, p1.y);
