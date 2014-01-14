@@ -308,7 +308,7 @@ void Fluids::drag(int mx, int my)
 void Fluids::click(int button, int state, int mx, int my)
 {
 
-	if (button == GLUT_LEFT_BUTTON && state==GLUT_DOWN)
+	if (button == GLUT_RIGHT_BUTTON && state==GLUT_DOWN)
     {
     	my = winHeight-my;
     	if(visualization.options[Visualization::DrawStreamlines]) simulation.add_seedpoint(mx,my);
