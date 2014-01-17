@@ -6,9 +6,11 @@
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <iostream>
 
+#include "grid.hpp"
 #include "util.hpp"
 #include "vector2.hpp"
 
@@ -38,13 +40,17 @@ public:
 	int   frozen ;               //toggles on/off the animation
 	// static Vector2 seedpoints[SEEDPOINTS_AMOUNT][STREAMLINE_LENGTH];
 	static vector<Vector2> seedpoints;
+
+	deque<Grid> slices;
+	int number_of_slices;
 private:
 	void FFT(int direction,void* vx);
 	float max(float x, float y);
 	void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, fftw_real visc, fftw_real dt);
 	void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *rho0, fftw_real dt);
 	void set_forces(void);
-
+	void add_slice();
+	
 	//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
 	fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
 	fftw_real *vx0, *vy0;           //(vx0,vy0) = velocity field at the previous moment

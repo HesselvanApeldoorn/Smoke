@@ -509,10 +509,74 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
     }
 }
 
+void Visualization::apply_scaling(Simulation const &simulation, float *min_value, float *max_value)
+{
+    const int DIM = Simulation::DIM;
+    *max_value=0;
+    *min_value=10;
+
+    for(int i=0; i<DIM*DIM-1; i++)
+    {
+        float value;
+        switch(selected_scalar)
+        {
+            case DensityScalar: 
+            {
+                value = simulation.rho[i];
+            } break;
+            case VelocityScalar: 
+            {
+                value = sqrt(simulation.vy[i]*simulation.vy[i]+simulation.vx[i]*simulation.vx[i])*10;
+
+            } break;
+            case ForceScalar: 
+            {
+                value = sqrt(simulation.fy[i]*simulation.fy[i]+simulation.fx[i]*simulation.fx[i])*10;
+            } break;
+        }
+
+        if(value>*max_value) //find maximum
+        {
+            *max_value=value;
+        }
+        if(value<*min_value) //find minimum
+        {
+            *min_value=value;
+        }
+    }
+}
+void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn, float min_value, float max_value)
+{
+    int i,j;
+    for (i = 0; i < number_of_glyphs_x; i++)
+    {
+        for (j = 0; j < number_of_glyphs_y; j++)
+        {
+            float value_x, value_y, glyph_point_x, glyph_point_y;
+
+            interpolation(dataset_x_scalar, dataset_y_scalar, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
+
+            float f;
+            if(selected_scalar==DensityScalar) {
+                f = value_x;
+            } else {
+                f = atan2(value_y,value_x) / M_PI + 1;
+            }
+
+           direction_to_color(f, min_value, max_value);
+
+            if (selected_vector != GradientVector) 
+                interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
+            else
+                vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y, max_value);
+            draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
+        }
+    }
+}
+
 //visualize: This is the main visualization function
 void Visualization::visualize(Simulation const &simulation, int winWidth, int winHeight)
 {
-    int i, j; 
     const int DIM = Simulation::DIM;
     fftw_real  wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real  hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
@@ -521,102 +585,83 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
     if(options[Scaling])
     {
-        max_value=0;
-        min_value=10;
+       apply_scaling(simulation, &min_value, &max_value);
+    }
 
-        for(i=0; i<DIM*DIM-1; i++)
-        {
-            float value;
+    if(options[Slices])
+    {
+        for(int i=simulation.slices.size()-1; i>=0;i--) {
+
+            // cout << " I: " << i << " slice: " << simulation.slices[i].vx[300] <<" \n";
+           fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
             switch(selected_scalar)
             {
                 case DensityScalar: 
                 {
-                    value = simulation.rho[i];
+                    dataset_x_scalar=simulation.slices[i].rho; dataset_y_scalar=simulation.slices[i].rho;
                 } break;
                 case VelocityScalar: 
                 {
-                    value = sqrt(simulation.vy[i]*simulation.vy[i]+simulation.vx[i]*simulation.vx[i])*10;
-
+                    dataset_x_scalar=simulation.slices[i].vx; dataset_y_scalar=simulation.slices[i].vy;
                 } break;
                 case ForceScalar: 
                 {
-                    value = sqrt(simulation.fy[i]*simulation.fy[i]+simulation.fx[i]*simulation.fx[i])*10;
+                    dataset_x_scalar=simulation.slices[i].fx; dataset_y_scalar=simulation.slices[i].fy;
                 } break;
             }
 
-            if(value>max_value) //find maximum
+            switch(selected_vector)
             {
-                max_value=value;
+                case VelocityVector: {dataset_x_vector=simulation.slices[i].vx; dataset_y_vector=simulation.slices[i].vy;} break;
+                case ForceVector: {dataset_x_vector=simulation.slices[i].fx; dataset_y_vector=simulation.slices[i].fy;} break;
             }
-            if(value<min_value) //find minimum
+
+            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value);
+
+        }
+    } else {
+
+
+
+        if (options[DrawSmoke])
+        {
+            draw_smoke(simulation,wn,hn, min_value, max_value);
+        }
+
+        if (options[DrawVecs])
+        {
+
+            fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
+            switch(selected_scalar)
             {
-                min_value=value;
+                case DensityScalar: 
+                {
+                    dataset_x_scalar=simulation.rho; dataset_y_scalar=simulation.rho;
+                } break;
+                case VelocityScalar: 
+                {
+                    dataset_x_scalar=simulation.vx; dataset_y_scalar=simulation.vy;
+                } break;
+                case ForceScalar: 
+                {
+                    dataset_x_scalar=simulation.fx; dataset_y_scalar=simulation.fy;
+                } break;
             }
-        }
-    }
 
-    if (options[DrawSmoke])
-    {
-        draw_smoke(simulation,wn,hn, min_value, max_value);
-    }
-
-    if (options[DrawVecs])
-    {
-
-        fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
-        switch(selected_scalar)
-        {
-            case DensityScalar: 
+            switch(selected_vector)
             {
-                dataset_x_scalar=simulation.rho; dataset_y_scalar=simulation.rho;
-            } break;
-            case VelocityScalar: 
-            {
-                dataset_x_scalar=simulation.vx; dataset_y_scalar=simulation.vy;
-            } break;
-            case ForceScalar: 
-            {
-                dataset_x_scalar=simulation.fx; dataset_y_scalar=simulation.fy;
-            } break;
-        }
-
-        switch(selected_vector)
-        {
-            case VelocityVector: {dataset_x_vector=simulation.vx; dataset_y_vector=simulation.vy;} break;
-            case ForceVector: {dataset_x_vector=simulation.fx; dataset_y_vector=simulation.fy;} break;
-        }
-
-        for (i = 0; i < number_of_glyphs_x; i++)
-        {
-            for (j = 0; j < number_of_glyphs_y; j++)
-            {
-                float value_x, value_y, glyph_point_x, glyph_point_y;
-
-                interpolation(dataset_x_scalar, dataset_y_scalar, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
-
-                float f;
-                if(selected_scalar==DensityScalar) {
-                    f = value_x;
-                } else {
-                    f = atan2(value_y,value_x) / M_PI + 1;
-                }
-
-                direction_to_color(f, min_value, max_value);
-
-                if (selected_vector != GradientVector) 
-                    interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
-                else
-                    vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y, max_value);
-                draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
+                case VelocityVector: {dataset_x_vector=simulation.vx; dataset_y_vector=simulation.vy;} break;
+                case ForceVector: {dataset_x_vector=simulation.fx; dataset_y_vector=simulation.fy;} break;
             }
+
+            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value);
+        }
+        if (options[DrawStreamlines])
+        {
+            //draw_streamlines(render_w, render_h, cell_w, cell_h);
+            draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value);
         }
     }
-    if (options[DrawStreamlines])
-    {
-        //draw_streamlines(render_w, render_h, cell_w, cell_h);
-        draw_streamlines(simulation,winWidth, winHeight, wn,hn, min_value, max_value);
-    }
-
     display_legend(winWidth, winHeight, min_value, max_value);
 
 }

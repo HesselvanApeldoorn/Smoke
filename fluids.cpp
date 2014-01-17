@@ -16,6 +16,7 @@ using namespace std;
 #define CLAMPMAX 6 // For clamp min spinner in glui
 #define NRGLYPHSX 7 // For number of glyphs x spinner in glui
 #define NRGLYPHSY 8 // For number of glyphs y spinner in glui
+#define NRSLICES 9 // For number of slices spinner in glui
 
 Simulation Fluids::simulation;		
 Visualization Fluids::visualization;	
@@ -36,6 +37,7 @@ GLUI_Spinner *clampmin_spinner;
 GLUI_Spinner *clampmax_spinner;
 GLUI_Spinner *glyph_x_spinner;
 GLUI_Spinner *glyph_y_spinner;
+GLUI_Spinner *slices_spinner;
 
 void Fluids::update()
 {
@@ -81,7 +83,7 @@ Fluids::Fluids(int argc, char **argv)
 
 // glShadeModel(GL_SMOOTH); glEnable(GL_COLOR_MATERIAL); glEnable(GL_DEPTH_TEST);
 
-	simulation.init_simulation();	//initialize the simulation data structures
+//	simulation.init_simulation();	//initialize the simulation data structures
 
 	Fluids::build_gui();
 
@@ -126,6 +128,7 @@ void Fluids::glui_callback( int control )
 		//Don't let the min value exceed the max value and let the max value be higher than the min value
 		case CLAMPMIN: clampmin_spinner->set_float_limits(0,visualization.clamp_max); break;
 		case CLAMPMAX: clampmax_spinner->set_float_limits(visualization.clamp_min,10); break;
+		case NRSLICES: simulation.number_of_slices = slices_spinner->get_int_val();break;
     }
 
   
@@ -142,6 +145,7 @@ void Fluids::build_gui()
 	glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
 	glui->add_checkbox_to_panel(options_panel, "Draw Streamlines", &visualization.options[Visualization::DrawStreamlines] );
 	glui->add_checkbox_to_panel(options_panel, "Scaling", &visualization.options[Visualization::Scaling] );
+	glui->add_checkbox_to_panel(options_panel, "Draw slices", &visualization.options[Visualization::Slices] );
 	glui->add_checkbox_to_panel(options_panel, "Freeze", &simulation.frozen );
 	options_panel->set_w(Fluids::GUI_WIDTH);
 
@@ -216,6 +220,10 @@ void Fluids::build_gui()
 	glui->add_radiobutton_to_group(glyph_radio, "Cone");
 	glui->add_radiobutton_to_group(glyph_radio, "Arrow");
 
+	slices_spinner = glui->add_spinner("Number of slices", GLUI_SPINNER_INT, &simulation.number_of_slices, NRSLICES, glui_callback );	
+	slices_spinner->set_speed(1); 
+	slices_spinner->set_int_limits(20,50);
+	slices_spinner->set_int_val(20);
 
 	new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
 	new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
