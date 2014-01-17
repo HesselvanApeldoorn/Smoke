@@ -124,6 +124,12 @@ void Visualization::direction_to_color(float f, float min_value, float max_value
     
     f = (f-clamp_min)/(clamp_max-clamp_min); // normalize clamp values 
 
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable (GL_DEPTH_TEST);
+    glEnable (GL_LIGHTING);
+    glEnable (GL_LIGHT0);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
     if(options[Scaling]) f = (f-min_value)/(max_value-min_value); //scaling
     switch (selected_colormap)
     {
