@@ -47,8 +47,8 @@ void Simulation::init_simulation()
 	slices.clear(); //remove slices
 	for (i = 0; i<number_of_slices; i++)
 	{
-		Grid new_grid = Grid(vx,vy, rho, fx, fy);
-		slices.push_back(new_grid);
+		Grid* new_grid = new Grid(vx,vy, rho, fx, fy);
+		slices.push_back(*new_grid);
 	}
 
 }
@@ -174,9 +174,9 @@ void Simulation::insert_forces(int X, int Y, double dx, double dy)
 void Simulation::add_slice()
 {
 
-	Grid new_grid(vx, vy, rho, fx, fy);
+	Grid *new_grid = new Grid(vx, vy, rho, fx, fy);
 	slices.pop_front();
-	slices.push_back(new_grid);
+	slices.push_back(*new_grid);
 
 }
 

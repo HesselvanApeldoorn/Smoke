@@ -10,6 +10,16 @@ Grid::Grid()
       this->rho = {};
 }
 
+Grid::~Grid()
+{
+      delete [] vx;
+      delete [] vy;
+      delete [] fx;
+      delete [] fy;
+      delete [] rho;
+
+}
+
 
 Grid::Grid(fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *fx, fftw_real *fy) 
 {

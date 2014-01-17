@@ -197,14 +197,12 @@ void Visualization::draw_gradient(int nrRect, int winWidth, int winHeight, float
     {
         int barStart = winWidth/4+i*barPiece;
         glBegin(GL_QUADS); //Begin gl_quads
-
-        glColor3f(rgbValues[i][0],rgbValues[i][1],rgbValues[i][2] );
-        glVertex2f(barStart, barHeight+bottomSpace);  //Top left
-        glVertex2f(barStart, bottomSpace); // Bottom left
-        glColor3f(rgbValues[i+1][0],rgbValues[i+1][1],rgbValues[i+1][2] );
-        glVertex2f(barStart+barPiece, bottomSpace); // Bottom right
-        glVertex2f(barStart+barPiece, barHeight+bottomSpace); // Top right
-
+            glColor3f(rgbValues[i][0],rgbValues[i][1],rgbValues[i][2] );
+            glVertex2f(barStart, barHeight+bottomSpace);  //Top left
+            glVertex2f(barStart, bottomSpace); // Bottom left
+            glColor3f(rgbValues[i+1][0],rgbValues[i+1][1],rgbValues[i+1][2] );
+            glVertex2f(barStart+barPiece, bottomSpace); // Bottom right
+            glVertex2f(barStart+barPiece, barHeight+bottomSpace); // Top right
         glEnd(); //End gl_quads
     }
 
@@ -668,6 +666,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
             draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value);
         }
     }
+    glDisable(GL_DEPTH_TEST); // to draw legend on top
     display_legend(winWidth, winHeight, min_value, max_value);
 
 }

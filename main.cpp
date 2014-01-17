@@ -2,8 +2,8 @@
 
 
 /*TODO:
-add shading to 3d shapes
 //TODO fix for window resizing in streamlines
+// TODO fix max length streamlines
 
 
 */

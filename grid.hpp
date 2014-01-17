@@ -4,6 +4,7 @@
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <cstring>
 
+#include <iostream>
 
 
 class Grid 
@@ -12,6 +13,7 @@ class Grid
 
 public:
 	Grid();
+	~Grid();
 	Grid(fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *fx, fftw_real *fy);
 	fftw_real *vx;
 	fftw_real *vy;

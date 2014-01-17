@@ -71,7 +71,7 @@ Fluids::Fluids(int argc, char **argv)
 	
 
 // 	glEnable(GL_COLOR_MATERIAL);
-//     glEnable (GL_DEPTH_TEST);
+    // glEnable (GL_DEPTH_TEST);
 //     glEnable (GL_LIGHTING);
 //     glEnable (GL_LIGHT0);
 
