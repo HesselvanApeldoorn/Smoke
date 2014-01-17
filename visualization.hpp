@@ -104,10 +104,10 @@ private:
 	void draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value);
 	void interpolation(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y, float max_value);
-	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y);
+	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y, int z);
 	void draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value);
 	void apply_scaling(Simulation const &simulation, float *min_value, float *max_value);
-	void draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn,  float min_value, float max_value);
+	void draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn,  float min_value, float max_value, int z);
 
 	int options[OptionSize];
 

@@ -384,7 +384,7 @@ void Visualization::vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, 
 
 }
 
-void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y)
+void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y, int z)
 {            
 
     float multiplier = Simulation::DIM/(sqrt(number_of_glyphs_y*number_of_glyphs_x)*3); // divided by 3 to make cones not overlap 
@@ -397,8 +397,8 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
         case Hedgehog: 
         {
            glBegin(GL_LINES);
-            glVertex2f(x1, y1);
-            glVertex2f(x2, y2);
+            glVertex3f(x1, y1,z);
+            glVertex3f(x2, y2,z);
            glEnd();
         } break;
         case Cone:
@@ -407,12 +407,12 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
             float size = sqrt(value_x*value_x+value_y*value_y)*vec_scale;
 
             glPushMatrix();
-            glTranslatef(wn*glyph_point_x, hn*glyph_point_y, 10);
+            glTranslatef(wn*glyph_point_x, hn*glyph_point_y, z);
             glRotatef(angle, 0.0, 0.0, 1.0);
             glRotatef(270.0, 1.0, 0.0, 0.0);
 
 
-            glutSolidCone(3*multiplier, size*multiplier, 12,12);
+            glutSolidCone(3*multiplier+5, size*multiplier, 12,12);
             glPopMatrix();
         } break;
         case Arrow:
@@ -423,15 +423,15 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
              double join_angle = M_PI / 6.0; // 30 degrees
              double stem_angle = atan2(y2-y1, x2-x1);
              int w = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))/1.5;
-             glVertex2f(x2, y2);
-             glVertex2f(x2 - w*cos(stem_angle+join_angle), y2 - w*sin(stem_angle+join_angle));
-             glVertex2f(x2 - w*cos(stem_angle-join_angle), y2 - w*sin(stem_angle-join_angle));
+             glVertex3f(x2, y2, z);
+             glVertex3f(x2 - w*cos(stem_angle+join_angle), y2 - w*sin(stem_angle+join_angle), z);
+             glVertex3f(x2 - w*cos(stem_angle-join_angle), y2 - w*sin(stem_angle-join_angle), z);
             glEnd();
 
             //arrow line
             glBegin(GL_LINES);
-             glVertex2f(x1, y1);
-             glVertex2f(x2, y2);
+             glVertex3f(x1, y1, z);
+             glVertex3f(x2, y2, z);
             glEnd();
             
         }
@@ -545,7 +545,7 @@ void Visualization::apply_scaling(Simulation const &simulation, float *min_value
         }
     }
 }
-void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn, float min_value, float max_value)
+void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn, float min_value, float max_value, int z)
 {
     int i,j;
     for (i = 0; i < number_of_glyphs_x; i++)
@@ -569,7 +569,7 @@ void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset
                 interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
             else
                 vector_gradient(dataset_x_scalar, dataset_y_scalar, i, j, &value_x, &value_y, &glyph_point_x, &glyph_point_y, max_value);
-            draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y);
+            draw_glyphs(value_x, value_y, wn, hn, glyph_point_x, glyph_point_y, z);
         }
     }
 }
@@ -616,7 +616,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 case ForceVector: {dataset_x_vector=simulation.slices[i].fx; dataset_y_vector=simulation.slices[i].fy;} break;
             }
 
-            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value);
+            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i);
 
         }
     } else {
@@ -654,7 +654,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 case ForceVector: {dataset_x_vector=simulation.fx; dataset_y_vector=simulation.fy;} break;
             }
 
-            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value);
+            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, 0);
         }
         if (options[DrawStreamlines])
         {
