@@ -75,21 +75,9 @@ Fluids::Fluids(int argc, char **argv)
     GLUI_Master.set_glutReshapeFunc(reshape);  
     GLUI_Master.set_glutIdleFunc(update);
     
-
-//  glEnable(GL_COLOR_MATERIAL);
-    // glEnable (GL_DEPTH_TEST);
-//     glEnable (GL_LIGHTING);
-//     glEnable (GL_LIGHT0);
-
-// //Add directed light
-//  GLfloat lightColor1[] = {0.5f, 0.2f, 0.2f, 1.0f}; //Color (0.5, 0.2, 0.2)
-//  //Coming from the direction (-1, 0.5, 0.5)
-//  GLfloat lightPos1[] = {-1.0f, 0.5f, 0.5f, 0.0f};
-// glLightfv(GL_LIGHT0, GL_AMBIENT, lightColor1);
-
-// glShadeModel(GL_SMOOTH); glEnable(GL_COLOR_MATERIAL); glEnable(GL_DEPTH_TEST);
-
-//  simulation.init_simulation();   //initialize the simulation data structures
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glClearColor(0.0,0.0,0.0,0.0);
 
     Fluids::build_gui();
 
@@ -233,7 +221,7 @@ void Fluids::build_gui()
     slices_spinner->set_int_val(20);
 
     opaque_spinner = glui->add_spinner("Opacity", GLUI_SPINNER_FLOAT, &visualization.number_of_opaque, NROPAQUE, glui_callback );   
-    opaque_spinner->set_speed(0.1); 
+    opaque_spinner->set_speed(0.2); 
     opaque_spinner->set_float_limits(0,1);
     opaque_spinner->set_float_val(1);
 
@@ -246,7 +234,6 @@ void Fluids::keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
-      // case 's': simulation.add_seedpoint(); break;
       case 't': simulation.change_timestep(-0.001); break;
       case 'T': simulation.change_timestep(+0.001); break;
       case 'H': visualization.change_hedgehog(1.2); break;

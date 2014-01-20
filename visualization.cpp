@@ -20,10 +20,12 @@ void Visualization::init_parameters()
     selected_colormap = Rainbow;
     selected_scalar = VelocityScalar;
     selected_vector = VelocityVector;
+    selected_glyph = Hedgehog;
     clamp_min = 0;
     clamp_max = 1;
     number_of_glyphs_x = Simulation::DIM;
     number_of_glyphs_y = Simulation::DIM;
+    number_of_opaque = 1;
 }
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void Visualization::rainbow(float value,float* R,float* G,float* B)
@@ -118,7 +120,7 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
 //                    using a rainbow colormap. If method==0, simply use the white color
-void Visualization::direction_to_color(float f, float min_value, float max_value)
+void Visualization::direction_to_color(float f, float min_value, float max_value, float max_slices_value)
 {
     float r,g,b;
     f = clamp(f, clamp_min, clamp_max); //clamping
@@ -173,7 +175,14 @@ void Visualization::direction_to_color(float f, float min_value, float max_value
             }
         }
     }
-    glColor3f(r,g,b);
+    if(options[Slices]) 
+    {
+        glColor4f(r,g,b,(f/max_slices_value)*Visualization::number_of_opaque);
+
+    } else
+    {
+       glColor3f(r,g,b);
+    }
 }
 
 void Visualization::draw_string(string text, int x, int y)
@@ -446,7 +455,7 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
     }
 }
 
-void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value, int z)
+void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value, int z, float max_slices_value)
 {
     const float dt  = 0.25;                 // fixed time step
     const size_t segments_per_line = Simulation::STREAMLINE_LENGTH;  // fixed max segments
@@ -494,7 +503,7 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
             float f = atan2(simulation.vy[idx],simulation.vx[idx]) / M_PI + 1;
 
-            direction_to_color(f, min_value, max_value);
+            direction_to_color(f, min_value, max_value, max_slices_value);
 
             if(segments==0) {
                 glBegin(GL_QUADS); //Begin gl_quads
@@ -554,7 +563,7 @@ void Visualization::apply_scaling(Simulation const &simulation, float *min_value
         }
     }
 }
-void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn, float min_value, float max_value, int z)
+void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset_y_scalar, fftw_real *dataset_x_vector, fftw_real *dataset_y_vector, fftw_real wn, fftw_real hn, float min_value, float max_value, int z, float max_slices_value)
 {
     int i,j;
     for (i = 0; i < number_of_glyphs_x; i++)
@@ -572,7 +581,7 @@ void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset
                 f = atan2(value_y,value_x) / M_PI + 1;
             }
 
-           direction_to_color(f, min_value, max_value);
+           direction_to_color(f, min_value, max_value, max_slices_value);
 
             if (selected_vector != GradientVector) 
                 interpolation(dataset_x_vector, dataset_y_vector, i,j, &value_x, &value_y, &glyph_point_x, &glyph_point_y);
@@ -599,7 +608,41 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
     if(options[Slices])
     {
-        for(int i=simulation.slices.size()-1; i>=0;i--) {
+        float max_slices_value=0;
+        for(int i=simulation.slices.size()-1; i>=0;i--) 
+        {
+            fftw_real *dataset_x_scalar, *dataset_y_scalar;
+            switch(selected_scalar)
+            {
+                case DensityScalar: 
+                {
+                    dataset_x_scalar=simulation.slices[i].rho; dataset_y_scalar=simulation.slices[i].rho;
+                } break;
+                case VelocityScalar: 
+                {
+                    dataset_x_scalar=simulation.slices[i].vx; dataset_y_scalar=simulation.slices[i].vy;
+                } break;
+                case ForceScalar: 
+                {
+                    dataset_x_scalar=simulation.slices[i].fx; dataset_y_scalar=simulation.slices[i].fy;
+                } break;
+            }
+            for(int j= 0; j<DIM*DIM;j++)
+            {
+
+                float f;
+                if(selected_scalar==DensityScalar) {
+                    f = dataset_x_scalar[j];
+                } else {
+                    f = atan2(dataset_y_scalar[j],dataset_x_scalar[j]) / M_PI + 1;
+                }
+                if(f>max_slices_value) max_slices_value = f;
+
+            }
+        }
+
+        for(int i=simulation.slices.size()-1; i>=0;i--) 
+        {
 
             if(options[DrawVecs])
             {
@@ -626,9 +669,9 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                     case ForceVector: {dataset_x_vector=simulation.slices[i].fx; dataset_y_vector=simulation.slices[i].fy;} break;
                 }
 
-                draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i);
+                draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i, max_slices_value);
             }
-            if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, i);
+            if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, i, max_slices_value);
 
 
         }
@@ -664,9 +707,9 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
                 case ForceVector: {dataset_x_vector=simulation.fx; dataset_y_vector=simulation.fy;} break;
             }
 
-            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, 0);
+            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, 0, 1);
         }
-        if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0);
+        if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0, 1);
     }
     glDisable(GL_DEPTH_TEST); // to draw legend on top
     glPopMatrix(); // Pop in order to not let the transformations affect the legend
