@@ -15,6 +15,8 @@ void Visualization::init_parameters()
     options[DrawSmoke] = false;           //draw the smoke or not
     options[DrawVecs] = true;            //draw the vector field or not
     options[DrawStreamlines] = false;
+    options[Slices] = false;
+    options[Scaling] = false;
     selected_colormap = Rainbow;
     selected_scalar = VelocityScalar;
     selected_vector = VelocityVector;
@@ -396,6 +398,8 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
     float y1 = hn + (fftw_real) glyph_point_y * hn;
     float x2 = x1 + multiplier * vec_scale * value_x; 
     float y2 = y1 + multiplier * vec_scale * value_y;
+    
+    z*=25+1; // Spacing between glyps
 
     switch(selected_glyph) {
         case Hedgehog: 
@@ -442,7 +446,7 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
     }
 }
 
-void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value)
+void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value, int z)
 {
     const float dt  = 0.25;                 // fixed time step
     const size_t segments_per_line = Simulation::STREAMLINE_LENGTH;  // fixed max segments
@@ -455,6 +459,7 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
     const float grid_area_w = winWidth - 2.0 * wn;
     const float grid_area_h = winHeight - 2.0 * hn;
 
+    z*=25+1; // Spacing between streamlines
 
     int seed_size = Simulation::seedpoints.size();
 
@@ -493,16 +498,16 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
             if(segments==0) {
                 glBegin(GL_QUADS); //Begin gl_quads
-                    glVertex2f(p0.x*window_correction-2.5, p0.y+2.5);  //Top left
-                    glVertex2f(p0.x*window_correction-2.5, p0.y-2.5); // Bottom left
-                    glVertex2f(p0.x*window_correction+2.5, p0.y-2.5); // Bottom right
-                    glVertex2f(p0.x*window_correction+2.5, p0.y+2.5); // Top right
+                    glVertex3f(p0.x*window_correction-2.5, p0.y+2.5,z);  //Top left
+                    glVertex3f(p0.x*window_correction-2.5, p0.y-2.5,z); // Bottom left
+                    glVertex3f(p0.x*window_correction+2.5, p0.y-2.5,z); // Bottom right
+                    glVertex3f(p0.x*window_correction+2.5, p0.y+2.5,z); // Top right
                 glEnd(); //End gl_quads
             }
             
             glBegin(GL_LINES);
-                glVertex2f(p0.x*window_correction, p0.y);
-                glVertex2f(p1.x*window_correction, p1.y);
+                glVertex3f(p0.x*window_correction, p0.y,z);
+                glVertex3f(p1.x*window_correction, p1.y,z);
             glEnd();
 
             segments++;
@@ -596,37 +601,38 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     {
         for(int i=simulation.slices.size()-1; i>=0;i--) {
 
-            // cout << " I: " << i << " slice: " << simulation.slices[i].vx[300] <<" \n";
-           fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
-            switch(selected_scalar)
+            if(options[DrawVecs])
             {
-                case DensityScalar: 
+                fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
+                switch(selected_scalar)
                 {
-                    dataset_x_scalar=simulation.slices[i].rho; dataset_y_scalar=simulation.slices[i].rho;
-                } break;
-                case VelocityScalar: 
-                {
-                    dataset_x_scalar=simulation.slices[i].vx; dataset_y_scalar=simulation.slices[i].vy;
-                } break;
-                case ForceScalar: 
-                {
-                    dataset_x_scalar=simulation.slices[i].fx; dataset_y_scalar=simulation.slices[i].fy;
-                } break;
-            }
+                    case DensityScalar: 
+                    {
+                        dataset_x_scalar=simulation.slices[i].rho; dataset_y_scalar=simulation.slices[i].rho;
+                    } break;
+                    case VelocityScalar: 
+                    {
+                        dataset_x_scalar=simulation.slices[i].vx; dataset_y_scalar=simulation.slices[i].vy;
+                    } break;
+                    case ForceScalar: 
+                    {
+                        dataset_x_scalar=simulation.slices[i].fx; dataset_y_scalar=simulation.slices[i].fy;
+                    } break;
+                }
 
-            switch(selected_vector)
-            {
-                case VelocityVector: {dataset_x_vector=simulation.slices[i].vx; dataset_y_vector=simulation.slices[i].vy;} break;
-                case ForceVector: {dataset_x_vector=simulation.slices[i].fx; dataset_y_vector=simulation.slices[i].fy;} break;
-            }
+                switch(selected_vector)
+                {
+                    case VelocityVector: {dataset_x_vector=simulation.slices[i].vx; dataset_y_vector=simulation.slices[i].vy;} break;
+                    case ForceVector: {dataset_x_vector=simulation.slices[i].fx; dataset_y_vector=simulation.slices[i].fy;} break;
+                }
 
-            draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i);
+                draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i);
+            }
+            if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, i);
+
 
         }
     } else {
-
-
-
         if (options[DrawSmoke])
         {
             draw_smoke(simulation,wn,hn, min_value, max_value);
@@ -660,13 +666,10 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
             draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, 0);
         }
-        if (options[DrawStreamlines])
-        {
-            //draw_streamlines(render_w, render_h, cell_w, cell_h);
-            draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value);
-        }
+        if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0);
     }
     glDisable(GL_DEPTH_TEST); // to draw legend on top
+    glPopMatrix(); // Pop in order to not let the transformations affect the legend
     display_legend(winWidth, winHeight, min_value, max_value);
 
 }

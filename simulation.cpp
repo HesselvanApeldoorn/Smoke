@@ -170,6 +170,20 @@ void Simulation::insert_forces(int X, int Y, double dx, double dy)
 	rho[Y * DIM + X] = 10.0f;
 }
 
+void Simulation::change_number_of_slices() 
+{
+	int difference = Simulation::number_of_slices-slices.size();
+
+	for(int i=0; i<abs(difference);i++)
+	{
+		if(difference<0) slices.pop_front();
+		if(difference>0) {
+			Grid *new_grid = new Grid(vx,vy,rho,fx,fy);
+			slices.push_back(*new_grid);
+		}
+	}
+}
+
 
 void Simulation::add_slice()
 {
@@ -192,7 +206,7 @@ void Simulation::do_one_simulation_step(void)
 		set_forces();
 		solve(DIM, vx, vy, vx0, vy0, visc, dt);
 		diffuse_matter(DIM, vx, vy, rho, rho0, dt);
-
+		change_number_of_slices();
 		add_slice();
 		glutPostRedisplay();
 	}

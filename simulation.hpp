@@ -49,6 +49,7 @@ private:
 	void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, fftw_real visc, fftw_real dt);
 	void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_real *rho0, fftw_real dt);
 	void set_forces(void);
+	void change_number_of_slices();
 	void add_slice();
 	
 	//--- SIMULATION PARAMETERS ------------------------------------------------------------------------
