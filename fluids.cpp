@@ -75,9 +75,10 @@ Fluids::Fluids(int argc, char **argv)
     GLUI_Master.set_glutReshapeFunc(reshape);  
     GLUI_Master.set_glutIdleFunc(update);
     
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glEnable(GL_BLEND);
     glClearColor(0.0,0.0,0.0,0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     Fluids::build_gui();
 

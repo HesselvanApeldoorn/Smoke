@@ -33,7 +33,7 @@ public:
 	void add_seedpoint(int x, int y);
 
     static const int DIM = 60;				//size of simulation grid
-    static const int STREAMLINE_LENGTH = 1500; // length of a streamline
+    static const int STREAMLINE_LENGTH = 60; // length of a streamline
     static const int SEEDPOINTS_AMOUNT = 100; // amount of seedpoints
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity

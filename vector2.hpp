@@ -24,7 +24,10 @@ public:
 	{
 	    return Vector2(x + n.x, y + n.y);
 	}
-
+	Vector2 operator+(float n)
+	{
+	    return Vector2(x + n, y + n);
+	}
 };
 
 #endif

@@ -457,9 +457,7 @@ void Visualization::draw_glyphs(float value_x, float value_y, fftw_real wn, fftw
 
 void Visualization::draw_streamlines(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value, int z, float max_slices_value)
 {
-    const float dt  = 0.25;                 // fixed time step
     const size_t segments_per_line = Simulation::STREAMLINE_LENGTH;  // fixed max segments
-    const float max_time = 1000.0;          // fixed max time
 
     const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
     const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
@@ -479,9 +477,8 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
        
         Vector2 p0  = Simulation::seedpoints[seed_index]; // seedpoint
         Vector2 p1;
-        float time = 0.0;
         size_t segments = 0;
-        while(segments < segments_per_line && time<max_time)
+        while(segments < segments_per_line)
         {
             if (p0.x < wn) p0.x += grid_area_w;
             if (p0.y < hn) p0.y += grid_area_h;
@@ -497,9 +494,9 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
             Vector2 velocity = Vector2(simulation.vx[idx], simulation.vy[idx]);
 
             if (velocity.length() > 0) // don't divide by zero
-                velocity.normalize();
+                velocity = velocity.normalize();
 
-            p1 = p0 + velocity * dt*100;
+            p1 = p0 + velocity*5;
 
             float f = atan2(simulation.vy[idx],simulation.vx[idx]) / M_PI + 1;
 
@@ -513,14 +510,15 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
                     glVertex3f(p0.x*window_correction+2.5, p0.y+2.5,z); // Top right
                 glEnd(); //End gl_quads
             }
-            
+            glLineWidth((GLfloat)5);
+
             glBegin(GL_LINES);
                 glVertex3f(p0.x*window_correction, p0.y,z);
                 glVertex3f(p1.x*window_correction, p1.y,z);
             glEnd();
+            glLineWidth(1.0f);
 
             segments++;
-            time+=dt;
             p0=p1;
 
         }
@@ -712,6 +710,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
         if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0, 1);
     }
     glDisable(GL_DEPTH_TEST); // to draw legend on top
+    glDisable (GL_LIGHTING);
     glPopMatrix(); // Pop in order to not let the transformations affect the legend
     display_legend(winWidth, winHeight, min_value, max_value);
 
