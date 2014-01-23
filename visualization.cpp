@@ -526,15 +526,23 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 void Visualization::draw_streamsurfaces(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value)
 {
     float window_correction = (winWidth-200)*0.0015625; 
-    const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
-    const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
+    float n = 60;
+    float xscale = (float)(n) / winWidth;
+    float yscale = (float)(n) / winHeight;
 
     for (int i = 0; i < simulation.stream_surfaces.size(); ++i)
     {
+        Vector2 *calc_seed_points =  (Vector2*) malloc(9);
+        for(int iii=0; iii<8;iii++)
+        {
+            calc_seed_points[iii] = simulation.stream_surfaces[i].seed_points[iii];
+            cout << calc_seed_points[iii].x << ",y: " << calc_seed_points[iii].y << "\n";
+        }
 
-        for(int j=simulation.slices.size()-1; j>=0;j--) 
+        for(int j=simulation.slices.size(); j>=0;j--)
         {
 
+            cout << "szz\n";
 
             // TODO: fix running out of screen
             // if (p0.x < wn) p0.x += grid_area_w;
@@ -543,20 +551,28 @@ void Visualization::draw_streamsurfaces(Simulation const &simulation, float winW
             // if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
             for(int streampoint=0; streampoint<7; streampoint++) 
             {
+                        cout << "kaas";
 
-                Vector2 p1_current = simulation.stream_surfaces[i].seed_points[streampoint];
-                Vector2 p2_current = simulation.stream_surfaces[i].seed_points[streampoint+1];
+                Vector2 p1_current = calc_seed_points[streampoint];
+                Vector2 p2_current = calc_seed_points[streampoint+1];
 
+                cout << "qqq\n";
 
                 
 
                 // nearest-neighbor interpolation
-                size_t ii = static_cast<int>(p1_current.x * xscale);
-                size_t jj = static_cast<int>(p1_current.y * yscale);
+                int ii = (int)(p1_current.x * xscale);
+                cout << "wtf?\n";
+                int jj = (int)(p1_current.y * yscale);
+                cout << "wtf?2\n";
+                                cout << "kaassssss";
 
-                size_t idx = jj * (Simulation::DIM-1) + ii;
+                // int idx = (n-1)*jj + ii; gives segfaults
+                int indexes = 4;
+                // cout << "idx: " << idx < "\n";
+                cout << "kaassssss";
                 // velocity at nearest grid location
-                Vector2 velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
+                Vector2 velocity = Vector2(simulation.slices[j].vx[indexes], simulation.slices[j].vy[indexes]);
 
                 // cout << "\nbe4 normalize" << velocity.x;
 
@@ -564,7 +580,7 @@ void Visualization::draw_streamsurfaces(Simulation const &simulation, float winW
                                
                 // cout << ", after normalize" << velocity.y;
 
-                Vector2 p1_next = p1_current + velocity*5 ; 
+                Vector2 p1_next = p1_current + velocity; 
 
                 // cout << "\nI: " << i << ", j: " << j << ", streampoint: " << streampoint;
 
@@ -579,13 +595,13 @@ void Visualization::draw_streamsurfaces(Simulation const &simulation, float winW
                     ii = static_cast<int>(p2_current.x * xscale);
                     jj = static_cast<int>(p2_current.y * yscale);
 
-                    idx = jj * (Simulation::DIM-1) + ii;
+                    int idx = jj * (Simulation::DIM-1) + ii;
                     // velocity at nearest grid location
                     velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
 
                     if (velocity.length() > 0) velocity.normalize();
                     
-                    Vector2 p2_next = p2_current + velocity*5 ; 
+                    Vector2 p2_next = p2_current + velocity; 
 
                     if (p2_next.x < wn) p2_next.x = -1;
                     if (p2_next.y < hn) p2_next.x = -1;
@@ -624,8 +640,9 @@ void Visualization::draw_streamsurfaces(Simulation const &simulation, float winW
                             glVertex3f(p2_next.x*window_correction, p2_next.y,j*25); // Top right
                         glEnd(); //End gl_quads
 
-                        simulation.stream_surfaces[i].seed_points[streampoint] = p1_next;
-                // if (i==6) simulation.stream_surfaces[i].seed_points[streampoint+1] = p2_next;
+                        calc_seed_points[streampoint] = p1_next;
+                        cout << "\n" << calc_seed_points[streampoint].x << ", <seedpoints> " << calc_seed_points[streampoint].y << "\n";
+                        // if (i==6) calc_seed_points[streampoint+1] = p2_next;
                     }
                 }
             }
