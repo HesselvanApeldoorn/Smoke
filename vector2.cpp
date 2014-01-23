@@ -22,16 +22,14 @@ float Vector2::length()
 }
  
 // Normalizes the vector
-Vector2 Vector2::normalize()
+void Vector2::normalize()
 {
     Vector2 vector;
     float length = this->length();
  
     if(length != 0)
     {
-        vector.x = x/length;
-        vector.y = y/length;
+        this->x = x/length;
+        this->y = y/length;
     }
- 
-    return vector;
-}
+ }

@@ -14,7 +14,7 @@ void Visualization::init_parameters()
     number_of_colors = 256;     // number of colors used
     options[DrawSmoke] = false;           //draw the smoke or not
     options[DrawVecs] = true;            //draw the vector field or not
-    options[DrawStreamlines] = false;
+    selected_stream = StreamLine;
     options[Slices] = false;
     options[Scaling] = false;
     selected_colormap = Rainbow;
@@ -115,7 +115,6 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
 
     glColor3f(R,G,B);
 }
-
 
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
@@ -468,14 +467,13 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
     z*=25+1; // Spacing between streamlines
 
-    int seed_size = Simulation::seedpoints.size();
+    float window_correction = (winWidth-200)*0.0015625; 
 
-    for (int seed_index = 0; seed_index < seed_size; ++seed_index)
+    for (int i = 0; i < Simulation::seedpoints.size(); ++i)
     {
   
-        float window_correction = (winWidth-200)*0.0015625; 
        
-        Vector2 p0  = Simulation::seedpoints[seed_index]; // seedpoint
+        Vector2 p0  = Simulation::seedpoints[i]; // seedpoint
         Vector2 p1;
         size_t segments = 0;
         while(segments < segments_per_line)
@@ -494,7 +492,7 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
             Vector2 velocity = Vector2(simulation.vx[idx], simulation.vy[idx]);
 
             if (velocity.length() > 0) // don't divide by zero
-                velocity = velocity.normalize();
+                velocity.normalize();
 
             p1 = p0 + velocity*5;
 
@@ -520,6 +518,95 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
             segments++;
             p0=p1;
+
+        }
+    }
+}
+
+void Visualization::draw_streamsurfaces(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value)
+{
+    float window_correction = (winWidth-200)*0.0015625; 
+    const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
+    const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
+
+    for (int i = 0; i < simulation.stream_surfaces.size(); ++i)
+    {
+        Vector2 p1_current = simulation.stream_surfaces[i].p1;
+        Vector2 p2_current = simulation.stream_surfaces[i].p2;
+        for(int j=simulation.slices.size()-1; j>=0;j--) 
+        {
+
+
+            // TODO: fix running out of screen
+            // if (p0.x < wn) p0.x += grid_area_w;
+            // if (p0.y < hn) p0.y += grid_area_h;
+            // if (p0.x >= (wn + winWidth)) p0.x -= grid_area_w;
+            // if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
+
+
+            // nearest-neighbor interpolation
+            size_t ii = static_cast<int>(p1_current.x * xscale);
+            size_t jj = static_cast<int>(p1_current.y * yscale);
+
+            size_t idx = jj * (Simulation::DIM-1) + ii;
+            // velocity at nearest grid location
+            Vector2 velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
+
+            if (velocity.length() > 0) // don't divide by zero
+                velocity.normalize();
+            
+            Vector2 p1_next = p1_current + velocity*5 ; 
+
+
+
+
+            ii = static_cast<int>(p2_current.x * xscale);
+            jj = static_cast<int>(p2_current.y * yscale);
+
+            idx = jj * (Simulation::DIM-1) + ii;
+            // velocity at nearest grid location
+            velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
+
+            if (velocity.length() > 0) // don't divide by zero
+                velocity.normalize();
+            
+            Vector2 p2_next = p2_current + velocity*5 ; 
+
+            Vector2 vertex[4] = {p1_next, p1_current, p2_next, p2_current};
+            Vector2 normal(0,0) ;
+
+
+            //Newell's method
+
+            for (int l=0; l<4; l++)
+            {
+                int k = (l+1)%4;
+                float vertex_l = (j+l%2)*25;
+                float vertex_k = (j+k%2)*25;
+                normal.x += (vertex[l].y - vertex[k].y)*(vertex_l + vertex_k);
+                normal.y += (vertex_l - vertex_k)*(vertex[l].x + vertex[k].x);
+            //     normal.z += (vertex[i].x - vertex[j].x)
+            //                *(vertex[i].y + vertex[j].y);
+            }
+            normal.normalize() ;
+
+
+            float f = atan2(normal.y,normal.x) / M_PI + 1;
+            direction_to_color(f, min_value, max_value, 0);
+
+    
+        
+
+            glBegin(GL_QUADS); //Begin gl_quads
+                glVertex3f(p1_next.x*window_correction, p1_next.y,j*25);  //Top left
+                glVertex3f(p1_current.x*window_correction, p1_current.y,(j+1)*25); // Bottom left
+                glVertex3f(p2_current.x*window_correction, p2_current.y,(j+1)*25); // Bottom right
+                glVertex3f(p2_next.x*window_correction, p2_next.y,j*25); // Top right
+            glEnd(); //End gl_quads
+
+            p1_current = p1_next;
+            p2_current = p2_next;
+
 
         }
     }
@@ -669,10 +756,14 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
                 draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, i, max_slices_value);
             }
-            if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, i, max_slices_value);
+            if (selected_stream==StreamLine) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, i, max_slices_value); 
 
 
         }
+
+        if(selected_stream==StreamSurface) draw_streamsurfaces(simulation,winWidth, winHeight, wn, hn, min_value, max_value);
+        
+
     } else {
         if (options[DrawSmoke])
         {
@@ -707,7 +798,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
             draw_vectors(dataset_x_scalar, dataset_y_scalar, dataset_x_vector, dataset_y_vector, wn, hn, min_value, max_value, 0, 1);
         }
-        if (options[DrawStreamlines]) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0, 1);
+        if (selected_stream==StreamLine) draw_streamlines(simulation,winWidth, winHeight, wn, hn, min_value, max_value, 0, 1);
     }
     glDisable(GL_DEPTH_TEST); // to draw legend on top
     glDisable (GL_LIGHTING);

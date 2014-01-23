@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "grid.hpp"
+#include "streamsurface.hpp"
 #include "util.hpp"
 #include "vector2.hpp"
 
@@ -30,17 +31,19 @@ public:
 	void change_viscosity(double viscosity);
 	void toggle_frozen();
 	void insert_forces(int X, int Y, double dx, double dy);
-	void add_seedpoint(int x, int y);
+	void add_seedpoint(Vector2 point);
+	void add_streamsurface(Vector2 p1, Vector2 p2);
 
     static const int DIM = 60;				//size of simulation grid
     static const int STREAMLINE_LENGTH = 60; // length of a streamline
     static const int SEEDPOINTS_AMOUNT = 100; // amount of seedpoints
+    static const int STREAMSURFACE_SIZE = 30; // max amount of streamsurfaces
 	float dt;				//simulation time step
 	float visc;				//fluid viscosity
 	int   frozen ;               //toggles on/off the animation
 	// static Vector2 seedpoints[SEEDPOINTS_AMOUNT][STREAMLINE_LENGTH];
 	static vector<Vector2> seedpoints;
-
+	deque<Stream_Surface> stream_surfaces;
 	deque<Grid> slices;
 	int number_of_slices;
 private:

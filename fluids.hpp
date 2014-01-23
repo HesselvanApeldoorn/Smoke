@@ -6,6 +6,7 @@
 
 #include "simulation.hpp"
 #include "util.hpp"
+#include "vector2.hpp"
 #include "visualization.hpp"
 
 class Fluids

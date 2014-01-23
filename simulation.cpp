@@ -50,6 +50,7 @@ void Simulation::init_simulation()
 		Grid* new_grid = new Grid(vx,vy, rho, fx, fy);
 		slices.push_back(*new_grid);
 	}
+	stream_surfaces.clear();
 
 }
 
@@ -227,7 +228,17 @@ void Simulation::toggle_frozen()
 	frozen = 1-frozen;
 }
 
-void Simulation::add_seedpoint(int x, int y)
+void Simulation::add_seedpoint(Vector2 point)
 {
-	if(seedpoints.size()<SEEDPOINTS_AMOUNT) seedpoints.push_back(Vector2(x, y));
+	if(seedpoints.size()<SEEDPOINTS_AMOUNT) seedpoints.push_back(point);
+}
+
+void Simulation::add_streamsurface(Vector2 p1, Vector2 p2)
+{
+	Stream_Surface* stream_surface = new Stream_Surface(p1,p2);
+	cout << stream_surfaces.size() << "\n";
+	if(stream_surfaces.size()==STREAMSURFACE_SIZE) stream_surfaces.pop_back();
+	stream_surfaces.push_front(*stream_surface);
+
+
 }

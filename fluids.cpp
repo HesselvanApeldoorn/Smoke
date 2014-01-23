@@ -31,6 +31,9 @@ int Fluids::main_window;
 float Fluids::camera_pitch;
 float Fluids::camera_heading;
 
+bool surface_end_point = false;
+Vector2 surface_point;
+
 const int Fluids::GUI_WIDTH = 200;
 //Spinners in glui
 GLUI_Spinner *timestep_spinner;
@@ -59,9 +62,9 @@ Fluids::Fluids(int argc, char **argv)
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    
-    glutInitWindowPosition( 400, 200 );
-    glutInitWindowSize(1000,800);
+
+    glutInitWindowPosition( 400, 100 );
+    glutInitWindowSize(1000,900);
 
     main_window = glutCreateWindow("Real-time smoke simulation and visualization");
 
@@ -139,7 +142,6 @@ void Fluids::build_gui()
     GLUI_Panel *options_panel = glui->add_panel("Options"); 
     glui->add_checkbox_to_panel(options_panel, "Draw Smoke", &visualization.options[Visualization::DrawSmoke] );
     glui->add_checkbox_to_panel(options_panel, "Draw Vector", &visualization.options[Visualization::DrawVecs] );
-    glui->add_checkbox_to_panel(options_panel, "Draw Streamlines", &visualization.options[Visualization::DrawStreamlines] );
     glui->add_checkbox_to_panel(options_panel, "Scaling", &visualization.options[Visualization::Scaling] );
     glui->add_checkbox_to_panel(options_panel, "Draw slices", &visualization.options[Visualization::Slices] );
     glui->add_checkbox_to_panel(options_panel, "Freeze", &simulation.frozen );
@@ -225,6 +227,12 @@ void Fluids::build_gui()
     opaque_spinner->set_speed(0.2); 
     opaque_spinner->set_float_limits(0,1);
     opaque_spinner->set_float_val(1);
+
+    GLUI_Panel *stream_panel = glui->add_panel("Stream - "); 
+    GLUI_RadioGroup *stream_radio = glui->add_radiogroup_to_panel(stream_panel, &visualization.selected_stream);
+    glui->add_radiobutton_to_group(stream_radio, "Lines");
+    glui->add_radiobutton_to_group(stream_radio, "Surfaces");
+
 
     new GLUI_Button( glui, "Reset", RESET_VALUES, glui_callback ); //Reset button
     new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit ); //Quit button
@@ -351,6 +359,16 @@ void Fluids::click(int button, int state, int mx, int my)
     if (button == GLUT_RIGHT_BUTTON && state==GLUT_DOWN)
     {
         my = winHeight-my;
-        if(visualization.options[Visualization::DrawStreamlines]) simulation.add_seedpoint(mx,my);
+        Vector2 point = Vector2(mx,my);
+        if(visualization.selected_stream==visualization.StreamLine) simulation.add_seedpoint(point);
+        if(visualization.selected_stream==visualization.StreamSurface) {
+            if(surface_end_point) { // second end point
+                simulation.add_streamsurface(surface_point, point);
+            } else { //first end point
+                surface_point = point;
+            }
+            surface_end_point = !surface_end_point;
+        }
+
     }
 }

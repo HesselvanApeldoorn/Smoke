@@ -13,7 +13,7 @@ public:
     Vector2(const Vector2 &v);
 
     float length();
-    Vector2 normalize();
+    void normalize();
     
 	Vector2 operator*(float n)
 	{
