@@ -71,7 +71,6 @@ public:
 	Visualization();
 	void init_parameters();
 
-	void set_colormap(Simulation const &simulation, int idx, float min_value, float max_value);
 	void visualize(Simulation const &simulation, int winWidth, int winHeight);
 	void rainbow(float value,float* R,float* G,float* B);
 	void fire(float value,float* R,float* G,float* B);
@@ -104,12 +103,13 @@ public:
 
 
 private:
+	void set_colormap(Simulation const &simulation, int idx, float min_value, float max_value, int z);
 	void draw_gradient(int nrRect, int winWidth, int winHeight, float rgbValues[][3], float min_value, float max_value);
 	void display_legend(int winWidth, int winHeight, float min_value, float max_value);
 	void direction_to_color(float f, float min_value, float max_value, float max_slices_value);
 
 	void draw_string(string text, int x, int y);
-	void draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value);
+	void draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value, int z);
 	void interpolation(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y);
 	void vector_gradient(fftw_real *dataset_x, fftw_real* dataset_y, int i, int j, float *value_x, float *value_y, float *glyph_point_x, float *glyph_point_y, float max_value);
 	void draw_glyphs(float value_x, float value_y, fftw_real wn, fftw_real hn, float glyph_point_x, float glyph_point_y, int z);

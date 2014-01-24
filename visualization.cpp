@@ -62,7 +62,7 @@ void Visualization::fire(float value,float* R,float* G,float* B)
 }
 
 //set_colormap: Sets three different types of colormaps
-void Visualization::set_colormap(Simulation const &simulation, int idx, float min_value, float max_value)
+void Visualization::set_colormap(Simulation const &simulation, int idx, float min_value, float max_value, int z)
 {
     // if(vy!=0 && vy <0) cout << vy <<"\n";
     float value, R,G,B;
@@ -72,22 +72,46 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
     {
         case DensityScalar: 
         {
-            value = simulation.rho[idx];
+            if(options[Slices]) 
+            {
+                value = simulation.slices[z].rho[idx];
+            } else 
+            {
+                value = simulation.rho[idx];
+            }
         }
         break;
         case VelocityScalar:
         {
-            value = sqrt(simulation.vx[idx]*simulation.vx[idx] + simulation.vy[idx]*simulation.vy[idx])*10;
+            if(options[Slices]) 
+            {
+                value = sqrt(simulation.slices[z].vx[idx]*simulation.slices[z].vx[idx] + simulation.slices[z].vy[idx]*simulation.slices[z].vy[idx])*10;
+            } else 
+            {
+                value = sqrt(simulation.vx[idx]*simulation.vx[idx] + simulation.vy[idx]*simulation.vy[idx])*10;
+            }
         }
         break;
         case ForceScalar: 
         {
-            value = sqrt(simulation.fx[idx]*simulation.fx[idx] + simulation.fy[idx]*simulation.fy[idx])*10;
+            if(options[Slices]) 
+            {
+                value = sqrt(simulation.slices[z].fx[idx]*simulation.slices[z].fx[idx] + simulation.slices[z].fy[idx]*simulation.slices[z].fy[idx])*10;
+            } else 
+            {
+                value = sqrt(simulation.fx[idx]*simulation.fx[idx] + simulation.fy[idx]*simulation.fy[idx])*10;
+            }
         }
         break;
         default: 
         {
-            value = simulation.rho[idx];
+            if(options[Slices]) 
+            {
+                value = simulation.slices[z].rho[idx];
+            } else 
+            {
+                value = simulation.rho[idx];
+            }
         }
     }
 
@@ -113,7 +137,7 @@ void Visualization::set_colormap(Simulation const &simulation, int idx, float mi
     B = round(B*(number_of_colors-1))/(number_of_colors-1);
 
 
-    glColor3f(R,G,B);
+    glColor3f(R,G,B); //TODO add opacity
 }
 
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
@@ -267,11 +291,12 @@ void Visualization::display_legend(int winWidth, int winHeight, float min_value,
     }
 }
 
-void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value)
+void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_real hn, float min_value, float max_value, int z)
 {
     const int DIM = Simulation::DIM;
     double px,py;
     int i, j, idx;  
+    z *= 25 +1;
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     for (j = 0; j < DIM - 1; j++)           //draw smoke
@@ -283,28 +308,28 @@ void Visualization::draw_smoke(Simulation const &simulation, fftw_real wn, fftw_
         py = hn + (fftw_real)j * hn;
         idx = (j * DIM) + i;
         
-        set_colormap(simulation, idx, min_value, max_value);
-        glVertex2f(px,py);
+        set_colormap(simulation, idx, min_value, max_value,(z-1)/25);
+        glVertex3f(px,py,z);
 
         for (i = 0; i < DIM - 1; i++)
         {
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + i;
-            set_colormap(simulation, idx, min_value, max_value);
-            glVertex2f(px, py);
+            set_colormap(simulation, idx, min_value, max_value,(z-1)/25);
+            glVertex3f(px, py, z);
             px = wn + (fftw_real)(i + 1) * wn;
             py = hn + (fftw_real)j * hn;
             idx = (j * DIM) + (i + 1);
-            set_colormap(simulation, idx, min_value, max_value);
-            glVertex2f(px, py);
+            set_colormap(simulation, idx, min_value, max_value,(z-1)/25);
+            glVertex3f(px, py,z);
         }
 
         px = wn + (fftw_real)(DIM - 1) * wn;
         py = hn + (fftw_real)(j + 1) * hn;
         idx = ((j + 1) * DIM) + (DIM - 1);
-        set_colormap(simulation, idx, min_value, max_value);
-        glVertex2f(px, py);
+        set_colormap(simulation, idx, min_value, max_value,(z-1)/25);
+        glVertex3f(px, py,z);
         glEnd();
     }
 
@@ -749,7 +774,10 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
 
         for(int i=simulation.slices.size()-1; i>=0;i--) 
         {
-
+            if (options[DrawSmoke])
+            {
+                draw_smoke(simulation,wn,hn, min_value, max_value,i);
+            }
             if(options[DrawVecs])
             {
                 fftw_real *dataset_x_scalar, *dataset_y_scalar, *dataset_x_vector, *dataset_y_vector;
@@ -788,7 +816,7 @@ void Visualization::visualize(Simulation const &simulation, int winWidth, int wi
     } else {
         if (options[DrawSmoke])
         {
-            draw_smoke(simulation,wn,hn, min_value, max_value);
+            draw_smoke(simulation,wn,hn, min_value, max_value,0);
         }
 
         if (options[DrawVecs])
