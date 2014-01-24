@@ -496,7 +496,7 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
             p1 = p0 + velocity*5;
 
-            float f = atan2(simulation.vy[idx],simulation.vx[idx]) / M_PI + 1;
+            float f = sqrt(simulation.vx[idx]*simulation.vx[idx] + simulation.vy[idx]*simulation.vy[idx]) * 10;
 
             direction_to_color(f, min_value, max_value, max_slices_value);
 
@@ -613,7 +613,7 @@ void Visualization::draw_streamsurfaces(Simulation const &simulation, float winW
                         normal.normalize() ;
 
 
-                        float f = atan2(normal.y,normal.x) / M_PI + 1;
+                        float f = sqrt(normal.x*normal.x + normal.y*normal.y) * 10;
                         direction_to_color(f, min_value, max_value, 0);
 
 
@@ -684,7 +684,7 @@ void Visualization::draw_vectors(fftw_real *dataset_x_scalar, fftw_real *dataset
             if(selected_scalar==DensityScalar) {
                 f = value_x;
             } else {
-                f = atan2(value_y,value_x) / M_PI + 1;
+                f =  sqrt(value_y*value_y+value_x*value_x)*10;
             }
 
            direction_to_color(f, min_value, max_value, max_slices_value);
