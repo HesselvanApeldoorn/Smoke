@@ -235,17 +235,10 @@ void Simulation::add_seedpoint(Vector2 point)
 
 void Simulation::add_streamsurface(Vector2 p1, Vector2 p2)
 {
-	Vector2 diff = p1-p2;
-	Vector2 *seed_points = (Vector2*) malloc(8);
-	for(int i=0; i<8;i++)
-	{
-		seed_points[i]=p1+(diff*(float)i)/7.0;
-		// cout << seed_points[i].x << " , y: " << seed_points[i].y << "\n";
-	}
-
-	Stream_Surface* stream_surface = new Stream_Surface(seed_points);
-	// cout << stream_surfaces.size() << "\n";
-	if(stream_surfaces.size()<STREAMSURFACE_SIZE) 	stream_surfaces.push_front(*stream_surface);
+	    Stream_Surface* stream_surface = new Stream_Surface(p1,p2);
+        cout << stream_surfaces.size() << "\n";
+        if(stream_surfaces.size()==STREAMSURFACE_SIZE) stream_surfaces.pop_back();
+        stream_surfaces.push_front(*stream_surface);
 
 
 }
