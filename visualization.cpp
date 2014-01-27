@@ -550,95 +550,113 @@ void Visualization::draw_streamlines(Simulation const &simulation, float winWidt
 
 void Visualization::draw_streamsurfaces(Simulation const &simulation, float winWidth, float winHeight, float wn, float hn, float min_value, float max_value)
 {
-   
-   float window_correction = (winWidth-200)*0.0015625; 
-     const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
-     const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
- 
-     for (int i = 0; i < simulation.stream_surfaces.size(); ++i)
-     {
-         Vector2 p1_current = simulation.stream_surfaces[i].p1;
-         Vector2 p2_current = simulation.stream_surfaces[i].p2;
-         for(int j=simulation.slices.size()-1; j>=0;j--) 
-         {
- 
- 
-             // TODO: fix running out of screen
-             // if (p0.x < wn) p0.x += grid_area_w;
-             // if (p0.y < hn) p0.y += grid_area_h;
-             // if (p0.x >= (wn + winWidth)) p0.x -= grid_area_w;
-             // if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
- 
- 
-             // nearest-neighbor interpolation
-             size_t ii = static_cast<int>(p1_current.x * xscale);
-             size_t jj = static_cast<int>(p1_current.y * yscale);
- 
-             size_t idx = jj * (Simulation::DIM-1) + ii;
-             // velocity at nearest grid location
-             Vector2 velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
- 
-             if (velocity.length() > 0) // don't divide by zero
-                 velocity.normalize();
-             
-             Vector2 p1_next = p1_current + velocity*5 ; 
- 
- 
- 
- 
-             ii = static_cast<int>(p2_current.x * xscale);
-             jj = static_cast<int>(p2_current.y * yscale);
- 
-             idx = jj * (Simulation::DIM-1) + ii;
-             // velocity at nearest grid location
-             velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
- 
-             if (velocity.length() > 0) // don't divide by zero
-                 velocity.normalize();
-             
-             Vector2 p2_next = p2_current + velocity*5 ; 
- 
-             Vector2 vertex[4] = {p1_next, p1_current, p2_next, p2_current};
-             Vector2 normal(0,0) ;
- 
- 
-             //Newell's method
- 
-             for (int l=0; l<4; l++)
-             {
-                 int k = (l+1)%4;
-                 float vertex_l = (j+l%2)*25;
-                 float vertex_k = (j+k%2)*25;
-                 normal.x += (vertex[l].y - vertex[k].y)*(vertex_l + vertex_k);
-                 normal.y += (vertex_l - vertex_k)*(vertex[l].x + vertex[k].x);
-             //     normal.z += (vertex[i].x - vertex[j].x)
-             //                *(vertex[i].y + vertex[j].y);
-             }
-             normal.normalize() ;
- 
- 
-             float f = atan2(normal.y,normal.x) / M_PI + 1;
-             direction_to_color(f, min_value, max_value, 0);
- 
-     
-         
- 
-             glBegin(GL_QUADS); //Begin gl_quads
-                 glVertex3f(p1_next.x*window_correction, p1_next.y,j*25);  //Top left
-                 glVertex3f(p1_current.x*window_correction, p1_current.y,(j+1)*25); // Bottom left
-                 glVertex3f(p2_current.x*window_correction, p2_current.y,(j+1)*25); // Bottom right
-                 glVertex3f(p2_next.x*window_correction, p2_next.y,j*25); // Top right
-             glEnd(); //End gl_quads
- 
-             p1_current = p1_next;
-             p2_current = p2_next;
+    float window_correction = (winWidth-200)*0.0015625; 
+    const float xscale = static_cast<float>(Simulation::DIM) / winWidth;
+    const float yscale = static_cast<float>(Simulation::DIM) / winHeight;
+
+    for (int i = 0; i < simulation.stream_surfaces.size(); ++i)
+    {
+
+        for(int j=simulation.slices.size()-1; j>=0;j--) 
+        {
 
 
+            // TODO: fix running out of screen
+            // if (p0.x < wn) p0.x += grid_area_w;
+            // if (p0.y < hn) p0.y += grid_area_h;
+            // if (p0.x >= (wn + winWidth)) p0.x -= grid_area_w;
+            // if (p0.y >= winHeight - hn) p0.y -= grid_area_h;
+            for(int streampoint=0; streampoint<7; streampoint++) 
+            {
+
+                Vector2 p1_current = simulation.stream_surfaces[i].seed_points[streampoint];
+                Vector2 p2_current = simulation.stream_surfaces[i].seed_points[streampoint+1];
+
+
+                
+
+                // nearest-neighbor interpolation
+                size_t ii = static_cast<int>(p1_current.x * xscale);
+                size_t jj = static_cast<int>(p1_current.y * yscale);
+
+                size_t idx = jj * (Simulation::DIM-1) + ii;
+                // velocity at nearest grid location
+                Vector2 velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
+
+                // cout << "\nbe4 normalize" << velocity.x;
+
+                if (velocity.length() > 0) velocity.normalize();
+                               
+                // cout << ", after normalize" << velocity.y;
+
+                Vector2 p1_next = p1_current + velocity*5 ; 
+
+                // cout << "\nI: " << i << ", j: " << j << ", streampoint: " << streampoint;
+
+                if (p1_next.x < wn) p1_next.x = -1;
+                if (p1_next.y < hn) p1_next.x = -1;
+                if (p1_next.x >= (wn + winWidth)) p1_next.x = -1;
+                if (p1_next.y >= winHeight - hn) p1_next.x = -1;
+
+
+                if(p1_next.x!=-1)
+                {
+                    ii = static_cast<int>(p2_current.x * xscale);
+                    jj = static_cast<int>(p2_current.y * yscale);
+
+                    idx = jj * (Simulation::DIM-1) + ii;
+                    // velocity at nearest grid location
+                    velocity = Vector2(simulation.slices[j].vx[idx], simulation.slices[j].vy[idx]);
+
+                    if (velocity.length() > 0) velocity.normalize();
+                    
+                    Vector2 p2_next = p2_current + velocity*5 ; 
+
+                    if (p2_next.x < wn) p2_next.x = -1;
+                    if (p2_next.y < hn) p2_next.x = -1;
+                    if (p2_next.x >= (wn + winWidth)) p2_next.x = -1;
+                    if (p2_next.y >= winHeight - hn) p2_next.x = -1;
+
+                    if(p2_next.x!=-1)
+                    {
+                        Vector2 vertex[4] = {p1_next, p1_current, p2_next, p2_current};
+                        Vector2 normal(0,0) ;
+
+
+                        //Newell's method
+
+                        for (int l=0; l<4; l++)
+                        {
+                            int k = (l+1)%4;
+                            float vertex_l = (j+l%2)*25;
+                            float vertex_k = (j+k%2)*25;
+                            normal.x += (vertex[l].y - vertex[k].y)*(vertex_l + vertex_k);
+                            normal.y += (vertex_l - vertex_k)*(vertex[l].x + vertex[k].x);
+                        //     normal.z += (vertex[i].x - vertex[j].x)
+                        //                *(vertex[i].y + vertex[j].y);
+                        }
+                        normal.normalize() ;
+
+
+                        float f = sqrt(normal.x*normal.x + normal.y*normal.y) * 10;
+                        direction_to_color(f, min_value, max_value, 0);
+
+
+                        glBegin(GL_QUADS); //Begin gl_quads
+                            glVertex3f(p1_next.x*window_correction, p1_next.y,j*25);  //Top left
+                            glVertex3f(p1_current.x*window_correction, p1_current.y,(j+1)*25); // Bottom left
+                            glVertex3f(p2_current.x*window_correction, p2_current.y,(j+1)*25); // Bottom right
+                            glVertex3f(p2_next.x*window_correction, p2_next.y,j*25); // Top right
+                        glEnd(); //End gl_quads
+
+                        simulation.stream_surfaces[i].seed_points[streampoint] = p1_next;
+                // if (i==6) simulation.stream_surfaces[i].seed_points[streampoint+1] = p2_next;
+                    }
+                }
+            }
         }
     }
 }
-
-
 
 void Visualization::apply_scaling(Simulation const &simulation, float *min_value, float *max_value)
 {
